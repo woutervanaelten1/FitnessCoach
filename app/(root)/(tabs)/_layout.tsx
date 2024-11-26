@@ -1,18 +1,20 @@
-import { Tabs } from "expo-router";
+import { Tabs, usePathname } from "expo-router";
 import { View, Image, ImageSourcePropType } from "react-native";
 import { icons } from "@/constants";
 
 const TabIcon = ({ source, focused }: { source: ImageSourcePropType, focused: boolean }) => (
-    <View className={`flex flex-row justify-center items-center rounded-full ${focused ? "bg-general-300" : ""}`}>
+    <View className={`flex flex-row justify-center items-center rounded-full ${focused ? "bg-white" : "bg-white"}`}>
         <View className={`rounded-full w-12 h-12 items-center justify-center ${focused ? "bg-white" : ""}`}>
-            <Image source={source} tintColor={focused ? "#307FE2" : "#D3D3D3"} resizeMode="contain" className="w-10 h-10" />
+            <Image source={source} tintColor={focused ? "#307FE2" : "#D3D3D3"} resizeMode="contain" className="w-12 h-12" />
         </View>
     </View>
 );
 
 const Layout = () => {
+    const pathname = usePathname();
+
     return (
-        <Tabs initialRouteName="index"
+        <Tabs initialRouteName="home"
             screenOptions={{
                 tabBarActiveTintColor: "white",
                 tabBarInactiveTintColor: "white",
@@ -20,7 +22,7 @@ const Layout = () => {
                 tabBarStyle: {
                     backgroundColor: "white",
                     borderRadius: 20,
-                    paddingBottom: 0,
+                    paddingBottom: 20,
                     overflow: "hidden",
                     marginBottom: 20,
                     marginHorizontal: 5,
@@ -43,7 +45,7 @@ const Layout = () => {
                 }}
             />
             <Tabs.Screen
-                name="dashboard"
+                name="dashboard/index"
                 options={{
                     title: "Dashboard",
                     headerShown: false,
@@ -53,7 +55,7 @@ const Layout = () => {
                 }}
             />
             <Tabs.Screen
-                name="chat"
+                name="chat/index"
                 options={{
                     title: "Coach",
                     headerShown: false,
@@ -63,13 +65,14 @@ const Layout = () => {
                 }}
             />
             <Tabs.Screen
-                name="targets"
+                name="progress/index"
                 options={{
                     title: "Targets & Progress",
                     headerShown: false,
-                    tabBarIcon: ({ focused }) => (
-                        <TabIcon focused={focused} source={icons.target} />
-                    ),
+                    tabBarIcon: ({ focused }) => {
+                        const isActive = pathname.startsWith("/progress");
+                        return <TabIcon focused={isActive} source={icons.target} />;
+                    },
                 }}
             />
             <Tabs.Screen
@@ -80,6 +83,22 @@ const Layout = () => {
                     tabBarIcon: ({ focused }) => (
                         <TabIcon focused={focused} source={icons.profile} />
                     ),
+                }}
+            />
+
+            {/* HIDE THESE ROUTES FROM THE NAVIGATION BAR */}
+            <Tabs.Screen
+                name="progress/editTargets"
+                options={{
+                    title: "Edit Targets",
+                    headerShown: false,
+                    href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="chat/earlierChats"
+                options={{
+                    href: null,
                 }}
             />
 

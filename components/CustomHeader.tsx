@@ -1,19 +1,29 @@
 import { icons } from "@/constants";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
 const CustomHeader = ({ title, showBackButton = true } : {title:string; showBackButton: boolean}) => {
+    const segments = useSegments();
+
+    const handleBackPress = () => {
+        if (segments.length > 1) {
+            router.back();
+        } else {
+            router.push("/(root)/(tabs)/home");
+        }
+    };
+
     return (
         <View className="flex-row items-center justify-between p-4 bg-white border-b border-gray-200">
             {/* Back Button */}
             {showBackButton ? (
-                <TouchableOpacity onPress={() => router.back()} className="flex items-center">
+                <TouchableOpacity onPress={handleBackPress} className="flex items-center">
                     <View className="w-8 h-8 bg-white rounded-full items-center justify-center">
                         <Image
                             source={icons.backArrow}
                             resizeMode="contain"
-                            className="w-4 h-4"
+                            className="w-7 h-7"
                             style={{ tintColor: "#307FE2" }}
                         />
                     </View>
