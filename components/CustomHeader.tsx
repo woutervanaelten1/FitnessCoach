@@ -3,7 +3,7 @@ import { router, useSegments } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
-const CustomHeader = ({ title, showBackButton = true } : {title:string; showBackButton: boolean}) => {
+const CustomHeader = ({ title, showBackButton = true, rightButton = null }: { title: string; showBackButton: boolean, rightButton?: React.ReactNode; }) => {
     const segments = useSegments();
 
     const handleBackPress = () => {
@@ -15,7 +15,7 @@ const CustomHeader = ({ title, showBackButton = true } : {title:string; showBack
     };
 
     return (
-        <View className="flex-row items-center justify-between p-4 bg-white border-b border-gray-200">
+        <View className="flex-row w-full items-center justify-between p-4 bg-white border-b border-gray-200">
             {/* Back Button */}
             {showBackButton ? (
                 <TouchableOpacity onPress={handleBackPress} className="flex items-center">
@@ -32,12 +32,15 @@ const CustomHeader = ({ title, showBackButton = true } : {title:string; showBack
                 // If no back button
                 <View style={{ width: 32 }} />
             )}
-            <Text className="text-lg font-bold uppercase text-center flex-1" style={{ color: "#307FE2" }}>
+            <Text
+                className={`text-lg font-bold uppercase text-center ${rightButton ? "ml-12" : ""
+                    }`}
+                style={{ color: "#307FE2" }}
+            >
                 {title || ""}
             </Text>
 
-            {/* Placeholder to keep the title centered */}
-            <View style={{ width: 32 }} />
+            {rightButton ? <View>{rightButton}</View> : <View style={{ width: 32 }} />}
         </View>
     )
 }

@@ -1,8 +1,9 @@
 import { Text, View } from "react-native";
 
 
-const ProgressBox = ({ value = 0, target, metric, progressBar, weeklyAverage }: { value?: number; target: number, metric: string, progressBar: boolean; weeklyAverage: number }) => {
-    const progress = Math.min(value / target, 1);
+const ProgressBox = ({ value, target, metric, progressBar, weeklyAverage }: { value?: number; target: number, metric: string, progressBar: boolean; weeklyAverage: number }) => {
+    const progressValue = value ?? 0;
+    const progress = Math.min(progressValue / target, 1);
 
     const getBarColorClass = () => {
         if (progress <= 0.25) return 'bg-red-500';

@@ -30,6 +30,9 @@ import scale from "@/assets/icons/scale.png";
 import sleepTime from "@/assets/icons/sleep_time.png";
 import ruler from "@/assets/icons/ruler.png";
 import bolt from "@/assets/icons/bolt.png";
+import plane from "@/assets/icons/send.png";
+import smile from "@/assets/icons/smile-solid.png";
+import settings from "@/assets/icons/cog-solid.png";
 
 export const images = {
     check,
@@ -67,4 +70,7 @@ export const icons = {
     ruler,
     sleepTime,
     bolt,
+    plane,
+    smile,
+    settings
 };

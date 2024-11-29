@@ -5,7 +5,6 @@ import config from "@/config";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const Targets = () => {
   const [steps, setSteps] = useState(0);
@@ -51,11 +50,11 @@ const Targets = () => {
           const total = data.reduce((sum, day) => sum + (day[field] || 0), 0);
           return total / data.length;
         };
-        
+
         setWeeklySteps(parseFloat(calculateWeeklyAverage(weeklyDataArray.available_data, "totalsteps").toFixed(0)));
         setWeeklyCalories(parseFloat(calculateWeeklyAverage(weeklyDataArray.available_data, "calories").toFixed(0)));
         setWeeklyMinutes(parseFloat(calculateWeeklyAverage(weeklyDataArray.available_data, "veryactiveminutes").toFixed(0)));
-        setWeeklySleep(parseFloat((calculateWeeklyAverage(weeklyDataArray.available_data, "total_sleep_minutes")/ 60).toFixed(2)));
+        setWeeklySleep(parseFloat((calculateWeeklyAverage(weeklyDataArray.available_data, "total_sleep_minutes") / 60).toFixed(2)));
       }
 
     } catch (error) {
@@ -70,18 +69,17 @@ const Targets = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">
+
       <CustomHeader title="Targets & Progress" showBackButton={false} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} className="p-4">
-        <ProgressBox value={steps} target={10000} metric="Steps" progressBar={true} weeklyAverage={weeklySteps} />
-        <ProgressBox value={activeMinutes} target={60} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
-        <ProgressBox value={sleep} target={8} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
-        <ProgressBox value={calories} target={1000} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
-        <ProgressBox value={751} target={1000} metric="other example" progressBar={true} weeklyAverage={1000} />
-        <CustomButton title="Check weight progress" />
-        <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
-      </ScrollView>
-    </SafeAreaView>
+      <ProgressBox value={steps} target={10000} metric="Steps" progressBar={true} weeklyAverage={weeklySteps} />
+      <ProgressBox value={activeMinutes} target={60} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
+      <ProgressBox value={sleep} target={8} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
+      <ProgressBox value={calories} target={1000} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
+      <ProgressBox value={751} target={1000} metric="other example" progressBar={true} weeklyAverage={1000} />
+      <CustomButton title="Check weight progress" />
+      <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
+    </ScrollView>
   );
 };
 

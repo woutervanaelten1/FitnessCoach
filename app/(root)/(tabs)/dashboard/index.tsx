@@ -4,7 +4,6 @@ import config from "@/config";
 import { icons } from "@/constants";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea } from "victory-native";
 
 const Dashboard = () => {
@@ -55,8 +54,8 @@ const Dashboard = () => {
     area: {
       style: {
         data: {
-          fill: "rgba(74, 144, 226, 0.3)", // Light blue fill with transparency
-          stroke: "#4A90E2", // Line color
+          fill: "rgba(74, 144, 226, 0.3)",
+          stroke: "#4A90E2",
           strokeWidth: 2,
         },
         labels: { fontSize: 10, fill: "#333" },
@@ -152,11 +151,11 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <ScrollView className="px-3 flex-1 bg-white">
       <CustomHeader title="Fitness Dashboard" showBackButton={false} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 75 }} className="p-4">
+      
         {/* Date Section */}
-        <Text className="text-black text-xl font-bold mb-1">January 26th</Text>
+        <Text className="text-black text-xl font-bold mb-1 mt-2">{config.FIXED_DATE}</Text>
         <Text className="text-blue-500 font-semibold text-sm mb-4">Touch one of the icons for more information</Text>
 
 
@@ -213,7 +212,6 @@ const Dashboard = () => {
           </VictoryChart>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 };
 
