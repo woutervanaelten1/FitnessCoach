@@ -20,7 +20,7 @@ const Layout = () => {
         <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
             <View style={{ flex: 1 }}>
                 <Tabs initialRouteName="home"
-                      screenOptions={{
+                    screenOptions={{
                         tabBarShowLabel: false,
                         tabBarStyle: {
                             backgroundColor: "white",
@@ -111,6 +111,46 @@ const Layout = () => {
                             title: "New Chat",
                             headerShown: false,
                             tabBarStyle: { display: "none" },
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
+                        name="dashboard/activeDetail"
+                        options={{
+                            title: "Activity Overview",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
+                        name="dashboard/calorieDetail"
+                        options={{
+                            title: "Calories Overview",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
+                        name="dashboard/sleepDetail"
+                        options={{
+                            title: "Sleep Overview",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
+                        name="dashboard/stepDetail"
+                        options={{
+                            title: "Steps Overview",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
+                        name="dashboard/dailyStep"
+                        options={{
+                            title: "Hourly Steps",
+                            headerShown: false,
                             href: null,
                         }}
                     />

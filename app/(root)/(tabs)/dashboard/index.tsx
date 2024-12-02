@@ -2,8 +2,9 @@ import CustomHeader from "@/components/CustomHeader";
 import IconTextBox from "@/components/IconTextBox";
 import config from "@/config";
 import { icons } from "@/constants";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea } from "victory-native";
 
 const Dashboard = () => {
@@ -153,22 +154,31 @@ const Dashboard = () => {
   return (
     <ScrollView className="px-3 flex-1 bg-white">
       <CustomHeader title="Fitness Dashboard" showBackButton={false} />
-      
-        {/* Date Section */}
-        <Text className="text-black text-xl font-bold mb-1 mt-2">{config.FIXED_DATE}</Text>
-        <Text className="text-blue-500 font-semibold text-sm mb-4">Touch one of the icons for more information</Text>
+
+      {/* Date Section */}
+      <Text className="text-black text-xl font-bold mb-1 mt-2">{config.FIXED_DATE}</Text>
+      <Text className="text-blue-500 font-semibold text-sm mb-4">Touch one of the icons for more information</Text>
 
 
-        <View className="flex-row justify-between mb-4">
+      <View className="flex-row justify-between mb-4 mt-4">
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/calorieDetail")}>
           <IconTextBox icon={icons.fire} topText={calories.toLocaleString()} bottomText="kcal" />
-          <IconTextBox icon={icons.walking} topText={steps.toLocaleString()} bottomText="steps" />
-          <IconTextBox icon={icons.timer} topText={activeMinutes.toLocaleString()} bottomText="minutes" />
-        </View>
+        </TouchableOpacity>
 
-        {/* Sleep Duration Section */}
-        <Text className="text-black text-lg font-semibold mb-1">Sleep duration last week (hours)</Text>
-        <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
-        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/stepDetail")}>
+          <IconTextBox icon={icons.walking} topText={steps.toLocaleString()} bottomText="steps" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/activeDetail")}>
+          <IconTextBox icon={icons.timer} topText={activeMinutes.toLocaleString()} bottomText="minutes" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Sleep Duration Section */}
+      <Text className="text-black text-lg font-semibold mb-1">Sleep duration last week (hours)</Text>
+      <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
+      <TouchableOpacity className="relative z-10" onPress={() => {router.push("/dashboard/sleepDetail");}}>
+        <View pointerEvents="none" className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
           <VictoryChart height={224} theme={customThemeBarChart} >
             <VictoryAxis
               style={customThemeBarChart.axisBottom.style}
@@ -192,26 +202,27 @@ const Dashboard = () => {
               } />
           </VictoryChart>
         </View>
+      </TouchableOpacity>
 
-        {/* Heart Rate Section */}
-        <Text className="text-black text-lg font-semibold mb-1">Daily heart rate summary</Text>
-        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-          <VictoryChart padding={{ top: 30, bottom: 40, left: 55, right: 35 }} height={224} theme={customThemeLineChart}>
-            <VictoryAxis 
-              tickValues={[0, 240, 480, 720, 960, 1200, 1440]}
-              tickFormat={(t) => timeLabels[Math.floor(t / 240)]}
-              style={customThemeLineChart.axisBottom.style}
-            />
-            <VictoryAxis dependentAxis style={customThemeLineChart.axisLeft.style} />
-            <VictoryArea
-              data={heartRateData}
-              x="time"
-              y="rate"
-              style={customThemeLineChart.area.style}
-            />
-          </VictoryChart>
-        </View>
-      </ScrollView>
+      {/* Heart Rate Section */}
+      <Text className="text-black text-lg font-semibold mb-1">Daily heart rate summary</Text>
+      <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+        <VictoryChart padding={{ top: 30, bottom: 40, left: 55, right: 35 }} height={224} theme={customThemeLineChart}>
+          <VictoryAxis
+            tickValues={[0, 240, 480, 720, 960, 1200, 1440]}
+            tickFormat={(t) => timeLabels[Math.floor(t / 240)]}
+            style={customThemeLineChart.axisBottom.style}
+          />
+          <VictoryAxis dependentAxis style={customThemeLineChart.axisLeft.style} />
+          <VictoryArea
+            data={heartRateData}
+            x="time"
+            y="rate"
+            style={customThemeLineChart.area.style}
+          />
+        </VictoryChart>
+      </View>
+    </ScrollView>
   );
 };
 

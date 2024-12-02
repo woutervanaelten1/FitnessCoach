@@ -33,6 +33,8 @@ import bolt from "@/assets/icons/bolt.png";
 import plane from "@/assets/icons/send.png";
 import smile from "@/assets/icons/smile-solid.png";
 import settings from "@/assets/icons/cog-solid.png";
+import sit from "@/assets/icons/sit.png";
+import forward from "@/assets/icons/forward-arrow.png";
 
 export const images = {
     check,
@@ -72,5 +74,7 @@ export const icons = {
     bolt,
     plane,
     smile,
-    settings
+    settings,
+    sit,
+    forward
 };
