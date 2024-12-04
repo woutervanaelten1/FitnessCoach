@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 
 const ProgressBar = ({ value, target }: { value: number; target: number }) => {
-  const progress = Math.min(value / target, 1) * 100;
+  const progress = Math.max(Math.min(value / target, 1) * 100, 2);
 
   return (
     <View className="mt-4">

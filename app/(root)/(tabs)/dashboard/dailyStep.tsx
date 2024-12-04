@@ -8,10 +8,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { icons } from "@/constants";
 
 const DailyStep = () => {
-    const stepGoal = 10000;
     const [steps, setSteps] = useState(0);
+    const [stepGoal, setStepGoal] = useState(0);
     const [processedStepData, setProcessedStepData] = useState<{ time: number; steps: number }[]>([]);
-    const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE)); // Initialize with config.FIXED_DATE
+    const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
     const [isDatePickerOpen, setDatePickerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -59,17 +59,23 @@ const DailyStep = () => {
             const formattedDate = date.toISOString().split("T")[0]; // Format as yyyy-MM-dd
             setIsLoading(true);
 
-            const [hourlyResponse, todayResponse] = await Promise.all([
+            const [hourlyResponse, todayResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${formattedDate}`),
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}`),
+                fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/steps`)
             ]);
 
-            if (!hourlyResponse.ok || !todayResponse.ok) {
+            if (!hourlyResponse.ok || !todayResponse.ok || !goalResponse.ok) {
                 throw new Error("Failed to fetch data");
             }
 
             const hourlyDataArray = await hourlyResponse.json();
             const todayDataArray = await todayResponse.json();
+            const goalData = await goalResponse.json();
+
+            if (goalData) {
+                setStepGoal(goalData.goal);
+            }
 
             // Specific day data
             const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;

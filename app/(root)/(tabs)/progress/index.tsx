@@ -15,23 +15,29 @@ const Targets = () => {
   const [weeklyCalories, setWeeklyCalories] = useState(0);
   const [weeklyMinutes, setWeeklyMinutes] = useState(0);
   const [weeklySleep, setWeeklySleep] = useState(0);
+  const [goalSteps, setGoalSteps] = useState(0);
+  const [goalSleep, setGoalSleep] = useState(0);
+  const [goalMinutes, setGoalMinutes] = useState(0);
+  const [goalCalories, setGoalCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const [todayResponse, weekResponse] = await Promise.all([
+      const [todayResponse, weekResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`)
+        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}`)
       ]);
 
       // Check if responses are ok
-      if (!todayResponse.ok || !weekResponse.ok) {
+      if (!todayResponse.ok || !weekResponse.ok || !goalResponse.ok) {
         throw new Error("Failed to fetch data");
       }
 
       // Parse responses
       const todayDataArray = await todayResponse.json();
       const weeklyDataArray = await weekResponse.json();
+      const goalDataArray = await goalResponse.json();
 
       //Todays data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
@@ -57,6 +63,24 @@ const Targets = () => {
         setWeeklySleep(parseFloat((calculateWeeklyAverage(weeklyDataArray.available_data, "total_sleep_minutes") / 60).toFixed(2)));
       }
 
+      if (goalDataArray && goalDataArray.length > 0) {
+        // Create a mapping for metrics to state setters
+        const metricSetters = {
+          steps: setGoalSteps,
+          sleep: setGoalSleep,
+          activity: setGoalMinutes,
+          calories: setGoalCalories,
+        };
+      
+        // Loop through the goalDataArray to set the appropriate state
+        goalDataArray.forEach((goal : { metric: keyof typeof metricSetters; goal: number }) => {
+          const setter = metricSetters[goal.metric];
+          if (setter) {
+            setter(goal.goal);
+          }
+        });
+      }
+
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -72,11 +96,11 @@ const Targets = () => {
     <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">
 
       <CustomHeader title="Targets & Progress" showBackButton={false} />
-      <ProgressBox value={steps} target={10000} metric="Steps" progressBar={true} weeklyAverage={weeklySteps} />
-      <ProgressBox value={activeMinutes} target={60} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
-      <ProgressBox value={sleep} target={8} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
-      <ProgressBox value={calories} target={1000} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
-      <ProgressBox value={751} target={1000} metric="other example" progressBar={true} weeklyAverage={1000} />
+      <ProgressBox value={steps} target={goalSteps} metric="Steps" progressBar={true} weeklyAverage={weeklySteps} />
+      <ProgressBox value={activeMinutes} target={goalMinutes} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
+      <ProgressBox value={sleep} target={goalSleep} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
+      <ProgressBox value={calories} target={goalCalories} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
+      <ProgressBox value={1002} target={1000} metric="other example" progressBar={true} weeklyAverage={1000} />
       <CustomButton title="Check weight progress" />
       <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
     </ScrollView>

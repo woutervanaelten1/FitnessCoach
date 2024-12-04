@@ -8,8 +8,8 @@ import { ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
 
 const CalorieDetail = () => {
-  const caloriegoal = 2200;
   const [calories, setCalories] = useState(0);
+  const [caloriegoal, setCalorieGoal] = useState(0);
   const [hourlyCalories, setHourlyCalorie] = useState<{ time: number; calories: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
@@ -56,18 +56,24 @@ const CalorieDetail = () => {
 
   const fetchData = async () => {
     try {
-      const [todayResponse, hourlyResponse] = await Promise.all([
+      const [todayResponse, hourlyResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/calories`)
       ]);
 
-      if (!todayResponse.ok || !hourlyResponse.ok) {
+      if (!todayResponse.ok || !hourlyResponse.ok || !goalResponse.ok) {
         throw new Error("Failed to fetch data");
       }
 
       const todayDataArray = await todayResponse.json();
       const hourlyDataArray = await hourlyResponse.json();
+      const goalData = await goalResponse.json();
 
+      // Goal Data
+      if (goalData){
+        setCalorieGoal(goalData.goal);
+      }
 
       // Today Data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;

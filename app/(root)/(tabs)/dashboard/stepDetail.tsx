@@ -11,8 +11,8 @@ import { ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
 const StepDetail = () => {
-    const stepGoal = 10000;
     const [steps, setSteps] = useState(0);
+    const [stepGoal, setStepGoal] = useState(0);
     const [distance, setDistance] = useState(0);
     const [stepData, setStepData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -54,17 +54,24 @@ const StepDetail = () => {
 
     const fetchData = async () => {
         try {
-            const [todayResponse, weeklyResponse] = await Promise.all([
+            const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
                 fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
+                fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/steps`)
             ]);
 
-            if (!todayResponse.ok || !weeklyResponse.ok) {
+            if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
                 throw new Error("Failed to fetch data");
             }
 
             const todayDataArray = await todayResponse.json();
             const weeklyDataArray = await weeklyResponse.json();
+            const goalData = await goalResponse.json();
+
+            // Goal Data
+            if (goalData) {
+                setStepGoal(goalData.goal);
+            }
 
 
             // Today Data
@@ -115,7 +122,6 @@ const StepDetail = () => {
             </View>
 
             <View>
-                {/* Progress Text */}
                 <Text className="text-black text-lg font-bold">
                     You're{" "}
                     <Text className="text-blue-500">{(stepGoal - steps).toLocaleString()} steps</Text> away from your goal!
@@ -149,15 +155,15 @@ const StepDetail = () => {
                         }}
                         labels={({ datum }) => datum.steps.toLocaleString()}
                         labelComponent={
-                          <VictoryLabel
-                            dy={-10}
-                            style={{ fontSize: 15, fill: "#307FE2" }}
-                          />
+                            <VictoryLabel
+                                dy={-10}
+                                style={{ fontSize: 15, fill: "#307FE2" }}
+                            />
                         } />
                 </VictoryChart>
             </View>
 
-            <CustomButton title="Daily step breakdown" onPress={() => router.push("/dashboard/dailyStep")}/>
+            <CustomButton title="Daily step breakdown" onPress={() => router.push("/dashboard/dailyStep")} />
         </ScrollView>
     );
 };
