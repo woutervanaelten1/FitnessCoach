@@ -2,8 +2,8 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import ProgressBox from "@/components/ProgressBox";
 import config from "@/config";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView } from "react-native";
 
 const Targets = () => {
@@ -88,9 +88,11 @@ const Targets = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">
@@ -100,7 +102,6 @@ const Targets = () => {
       <ProgressBox value={activeMinutes} target={goalMinutes} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
       <ProgressBox value={sleep} target={goalSleep} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
       <ProgressBox value={calories} target={goalCalories} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
-      <ProgressBox value={1002} target={1000} metric="other example" progressBar={true} weeklyAverage={1000} />
       <CustomButton title="Check weight progress" />
       <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
     </ScrollView>
