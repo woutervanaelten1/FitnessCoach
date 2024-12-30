@@ -1,23 +1,72 @@
 import ChatBubble from "@/components/ChatBubble";
 import CustomHeader from "@/components/CustomHeader";
+import config from "@/config";
 import { icons } from "@/constants";
 import { useRef, useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const Chat = () => {
-    const messages = [
-        { id: '1', text: 'How can I assist with your fitness goals?', isUser: false },
-        { id: '2', text: 'I want to know more about my steps data', isUser: true },
-        { id: '3', text: 'I want to know more about my steps data', isUser: true },
-        { id: '4', text: 'I want to know more about my steps data I want to know more about my steps data', isUser: false },
-        { id: '5', text: 'I want to know more about my steps data', isUser: true },
-        { id: '6', text: 'I want to know more about my steps data', isUser: true },
-        { id: '7', text: 'This is the last message', isUser: false },
-    ];
+    type Message = {
+        id: string;
+        text: string;
+        isUser: boolean;
+    };
 
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
-    const scrollViewRef = useRef(null);
+    const scrollViewRef = useRef<ScrollView | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
+    const handleSendMessage = async () => {
+        if (!input.trim()) return; // Prevent sending empty messages
+
+        // Add the user's message to the messages array
+        const userMessage = { id: Date.now().toString(), text: input, isUser: true };
+        setMessages((prevMessages) => [...prevMessages, userMessage]);
+        setInput(''); // Clear input field
+        setIsLoading(true);
+
+        try {
+            // Call your FastAPI endpoint using fetch
+            const response = await fetch(`${config.API_BASE_URL}/chat/test/chat`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_id: config.USER_ID,
+                    message: input,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Add chatbot's response to the messages array
+            const botMessage = {
+                id: Date.now().toString(),
+                text: data.response,
+                isUser: false,
+            };
+            setMessages((prevMessages) => [...prevMessages, botMessage]);
+
+            // Scroll to the bottom of the chat
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        } catch (error) {
+            console.error("Error fetching chatbot response:", error);
+            const errorMessage = {
+                id: Date.now().toString(),
+                text: "Sorry, something went wrong. Please try again later.",
+                isUser: false,
+            };
+            setMessages((prevMessages) => [...prevMessages, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <View className="flex-1 bg-white">
@@ -34,16 +83,24 @@ const Chat = () => {
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 45 : 0} // Offset for header (if any)
+                keyboardVerticalOffset={Platform.OS === "ios" ? 45 : 0}
             >
                 <ScrollView
                     ref={scrollViewRef}
                     contentContainerStyle={{ paddingHorizontal: 10 }}
                     className="flex-1"
+                    onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
                 >
                     {messages.map((message) => (
-                        <ChatBubble key={message.id} message={message.text} isUser={message.isUser} maxWidth="85" />
+                        <ChatBubble key={message.id} message={message.text} isUser={message.isUser} maxWidth={90} />
                     ))}
+
+                    {isLoading && (
+                        <View className="items-center justify-center py-3">
+                            <ActivityIndicator size="large" color="#307FE2" />
+                            <Text className="text-base text-gray-500 mt-2">Loading response...</Text>
+                        </View>
+                    )}
                 </ScrollView>
 
                 <View className="bg-white border-t border-gray-300 p-3">
@@ -53,9 +110,11 @@ const Chat = () => {
                             placeholder="Type your message..."
                             value={input}
                             onChangeText={setInput}
+                            textAlignVertical="center"
                         />
                         <TouchableOpacity
                             className="ml-3 bg-blue-500 rounded-full px-4 py-2 justify-center items-center"
+                            onPress={handleSendMessage}
                         >
                             <Image source={icons.plane} tintColor="#fff" resizeMode="contain" className="w-5 h-5" />
                         </TouchableOpacity>

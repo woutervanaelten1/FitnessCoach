@@ -35,6 +35,7 @@ import smile from "@/assets/icons/smile-solid.png";
 import settings from "@/assets/icons/cog-solid.png";
 import sit from "@/assets/icons/sit.png";
 import forward from "@/assets/icons/forward-arrow.png";
+import heart from "@/assets/icons/heart.png";
 
 export const images = {
     check,
@@ -76,5 +77,6 @@ export const icons = {
     smile,
     settings,
     sit,
-    forward
+    forward,
+    heart
 };

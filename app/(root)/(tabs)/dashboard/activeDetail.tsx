@@ -23,7 +23,7 @@ const ActivityDetail = () => {
     try {
       const [activityResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/activity`)
+        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/activity`)
       ]);
 
       if (!activityResponse.ok || !goalResponse.ok) {
@@ -107,7 +107,7 @@ const ActivityDetail = () => {
 
 
       <View className=" items-center justify-center mt-6 mb-8">
-        <ChatBubble isUser={false} maxWidth="100" message="Try to take some active breaks and keep your sedentary time under 9 hours!" />
+        <ChatBubble isUser={false} maxWidth={100} message="Try to take some active breaks and keep your sedentary time under 9 hours!" />
         <CustomButton title="Get more activity tips" className="w-3/4" />
       </View>
     </ScrollView>

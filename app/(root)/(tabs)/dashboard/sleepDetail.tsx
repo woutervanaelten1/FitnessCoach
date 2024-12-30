@@ -5,7 +5,7 @@ import IconTextBox from "@/components/IconTextBox";
 import config from "@/config";
 import { icons } from "@/constants";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
 const SleepDetail = () => {
@@ -15,6 +15,9 @@ const SleepDetail = () => {
   const [sleepData, setSleepData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const sleephours = 0;
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+  const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -61,7 +64,7 @@ const SleepDetail = () => {
       const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/sleep`)
+        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/sleep`)
       ]);
 
       if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
@@ -81,7 +84,7 @@ const SleepDetail = () => {
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
       if (todayData && goalData) {
         const minutes = todayData.total_sleep_minutes;
-        const percentage = Math.round((minutes / (goalData.goal *60)) * 100);
+        const percentage = Math.round((minutes / (goalData.goal * 60)) * 100);
         setSleepHours(Math.floor(minutes / 60));
         setSleepPercentage(percentage);
       }
@@ -110,8 +113,25 @@ const SleepDetail = () => {
 
   };
 
+  const fetchDetail = async () => {
+    try {
+        setDetailLoading(true);
+        const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=sleep`);
+        if (!response.ok) throw new Error("Failed to fetch detail");
+
+        const data = await response.json();
+        setDetail(data.output);
+    } catch (error) {
+        console.error("Error fetching detail:", error);
+        setFetchError(true);
+    } finally {
+        setDetailLoading(false);
+    }
+};
+
   useEffect(() => {
     fetchData();
+    fetchDetail();
   }, []);
 
 
@@ -147,9 +167,47 @@ const SleepDetail = () => {
         </View>
       </View>
 
-      <View className=" items-center justify-center mt-6">
-        <ChatBubble isUser={false} maxWidth="100" message="Try to get some extra rest today, and consider a calming bedtime routine tonight to help improve sleep quality." />
-        <CustomButton title="Get more sleep tips!" className="w-3/4" />
+      <View>
+        {detailLoading ? (
+          <View className="items-center mt-5">
+            <ActivityIndicator size="large" color="#307FE2" />
+            <Text className="text-lg font-bold">Loading...</Text>
+          </View>
+        ) : fetchError ? (
+          <View className="items-center">
+            <Text className="text-red-500 text-lg font-bold mb-4">Failed to load details</Text>
+            <CustomButton
+              title="Retry"
+              onPress={fetchDetail}
+              className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+            />
+          </View>
+        ) : detail ? (
+          detail.type === "question" ? (
+            <View className="mt-4 items-center">
+              <ChatBubble
+                message={detail.content}
+                isUser={false}
+                maxWidth={100}
+              />
+
+              <CustomButton
+                title="Check it out"
+                onPress={() => console.log("Check it out button clicked")}
+                className="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+              />
+            </View>
+          ) : (
+            <View>
+              <Text className="text-lg font-bold">{detail.type}</Text>
+              <View className="items-center px-4">
+                <Text className="text-blue-500 text-lg font-bold">{detail.content}</Text>
+              </View>
+            </View>
+          )
+        ) : (
+          <Text className="text-gray-500 text-lg">No details found.</Text>
+        )}
       </View>
 
       <Text className="text-black text-lg font-semibold mb-1 mt-8">Sleep duration last week (hours)</Text>

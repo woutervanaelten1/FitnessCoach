@@ -22,7 +22,7 @@ const Index = () => {
         </Text>
 
         {messages.map((message) => (
-          <ChatBubble key={message.id} message={message.text} isUser={message.isUser} maxWidth="100" />
+          <ChatBubble key={message.id} message={message.text} isUser={message.isUser} maxWidth={100} />
         ))}
       </View>
 

@@ -115,6 +115,14 @@ const Layout = () => {
                         }}
                     />
                     <Tabs.Screen
+                        name="chat/conversationDetail/[conversationId]"
+                        options={{
+                            title: "Earlier conversation",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
                         name="dashboard/activeDetail"
                         options={{
                             title: "Activity Overview",

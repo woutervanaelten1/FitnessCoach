@@ -4,14 +4,19 @@ import FullCircle from "@/components/FullCircle";
 import config from "@/config";
 import { icons } from "@/constants";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
+import CustomButton from "@/components/CustomButton";
+import ChatBubble from "@/components/ChatBubble";
 
 const CalorieDetail = () => {
   const [calories, setCalories] = useState(0);
   const [caloriegoal, setCalorieGoal] = useState(0);
   const [hourlyCalories, setHourlyCalorie] = useState<{ time: number; calories: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+  const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -59,7 +64,7 @@ const CalorieDetail = () => {
       const [todayResponse, hourlyResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/calories`)
+        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/calories`),
       ]);
 
       if (!todayResponse.ok || !hourlyResponse.ok || !goalResponse.ok) {
@@ -71,7 +76,7 @@ const CalorieDetail = () => {
       const goalData = await goalResponse.json();
 
       // Goal Data
-      if (goalData){
+      if (goalData) {
         setCalorieGoal(goalData.goal);
       }
 
@@ -103,8 +108,25 @@ const CalorieDetail = () => {
 
   };
 
+  const fetchDetail = async () => {
+    try {
+      setDetailLoading(true);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=calories`);
+      if (!response.ok) throw new Error("Failed to fetch detail");
+
+      const data = await response.json();
+      setDetail(data.output);
+    } catch (error) {
+      console.error("Error fetching detail:", error);
+      setFetchError(true);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchDetail();
   }, []);
 
   return (
@@ -114,15 +136,52 @@ const CalorieDetail = () => {
       <View className="flex-row justify-between mb-4 mt-4">
         <IconTextBox icon={icons.fire} topText={calories.toLocaleString()} bottomText="kcal burned" />
         <View className="flex-1 items-center justify-center bg-gray-100 rounded-lg p-4 mx-1">
-          <FullCircle value={calories} goal={caloriegoal} metric={"kcal"}/>
+          <FullCircle value={calories} goal={caloriegoal} metric={"kcal"} />
         </View>
       </View>
 
       <View>
-        <Text className="text-lg font-bold">Insights</Text>
-        <View className="items-center px-4">
-          <Text className="text-blue-500 text-lg font-bold">You have burned 15% more calories by this time today than yesterday!</Text>
-        </View>
+        {detailLoading ? (
+          <View className="items-center mt-5">
+            <ActivityIndicator size="large" color="#307FE2" />
+            <Text className="text-lg font-bold">Loading...</Text>
+          </View>
+        ) : fetchError ? (
+          <View className="items-center">
+            <Text className="text-red-500 text-lg font-bold mb-4">Failed to load details</Text>
+            <CustomButton
+              title="Retry"
+              onPress={fetchDetail}
+              className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+            />
+          </View>
+        ) : detail ? (
+          detail.type === "question" ? (
+            <View className="mt-4 items-center">
+              <Text className="text-lg font-bold">Suggested question</Text>
+              <ChatBubble
+                message={detail.content}
+                isUser={false}
+                maxWidth={100}
+              />
+
+              <CustomButton
+                title="Check it out"
+                onPress={() => console.log("Check it out button clicked")}
+                className="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+              />
+            </View>
+          ) : (
+            <View>
+              <Text className="text-lg font-bold">{detail.type}</Text>
+              <View className="items-center px-4">
+                <Text className="text-blue-500 text-lg font-bold">{detail.content}</Text>
+              </View>
+            </View>
+          )
+        ) : (
+          <Text className="text-gray-500 text-lg">No details found.</Text>
+        )}
       </View>
 
       <Text className="text-black text-lg font-semibold mb-1 mt-6">Hourly calorie breakdown</Text>

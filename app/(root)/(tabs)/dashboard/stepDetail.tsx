@@ -7,7 +7,7 @@ import config from "@/config";
 import { icons } from "@/constants";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
 const StepDetail = () => {
@@ -16,6 +16,9 @@ const StepDetail = () => {
     const [distance, setDistance] = useState(0);
     const [stepData, setStepData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [detailLoading, setDetailLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
+    const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
 
 
     const customThemeBarChart = {
@@ -57,7 +60,7 @@ const StepDetail = () => {
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
                 fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-                fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/steps`)
+                fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/steps`)
             ]);
 
             if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
@@ -108,8 +111,25 @@ const StepDetail = () => {
 
     };
 
+    const fetchDetail = async () => {
+        try {
+            setDetailLoading(true);
+            const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=steps`);
+            if (!response.ok) throw new Error("Failed to fetch detail");
+
+            const data = await response.json();
+            setDetail(data.output);
+        } catch (error) {
+            console.error("Error fetching detail:", error);
+            setFetchError(true);
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchDetail();
     }, []);
 
     return (
@@ -129,9 +149,47 @@ const StepDetail = () => {
                 <ProgressBar value={steps} target={stepGoal} />
             </View>
 
-            <View className=" items-center justify-center mt-6">
-                <ChatBubble isUser={false} maxWidth="100" message="You're 1000 steps behind compared to yesterday! Do you want to check out what you can do to be sure to hit your goal?" />
-                <CustomButton title="Check it out!" className="w-3/4" />
+            <View>
+                {detailLoading ? (
+                    <View className="items-center mt-5">
+                        <ActivityIndicator size="large" color="#307FE2" />
+                        <Text className="text-lg font-bold">Loading...</Text>
+                    </View>
+                ) : fetchError ? (
+                    <View className="items-center">
+                        <Text className="text-red-500 text-lg font-bold mb-4">Failed to load details</Text>
+                        <CustomButton
+                            title="Retry"
+                            onPress={fetchDetail}
+                            className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+                        />
+                    </View>
+                ) : detail ? (
+                    detail.type === "question" ? (
+                        <View className="mt-4 items-center">
+                            <ChatBubble
+                                message={detail.content}
+                                isUser={false}
+                                maxWidth={100}
+                            />
+
+                            <CustomButton
+                                title="Check it out"
+                                onPress={() => console.log("Check it out button clicked")}
+                                className="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+                            />
+                        </View>
+                    ) : (
+                        <View>
+                            <Text className="text-lg font-bold">{detail.type}</Text>
+                            <View className="items-center px-4">
+                                <Text className="text-blue-500 text-lg font-bold">{detail.content}</Text>
+                            </View>
+                        </View>
+                    )
+                ) : (
+                    <Text className="text-gray-500 text-lg">No details found.</Text>
+                )}
             </View>
 
             <Text className="text-black text-lg font-semibold mb-1 mt-6">Weekly steps summary</Text>
