@@ -4,8 +4,8 @@ import ProgressBox from "@/components/ProgressBox";
 import config from "@/config";
 
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
-import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
+import { ScrollView, Text, TouchableOpacity } from "react-native";
+import Toast from "react-native-toast-message";
 
 
 const Targets = () => {
@@ -30,7 +30,7 @@ const Targets = () => {
     try {
       const [weekResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}`)
+        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}`)
       ]);
 
 
@@ -61,7 +61,7 @@ const Targets = () => {
         const metricSetters = {
           steps: setGoalSteps,
           sleep: setGoalSleep,
-          activity: setGoalMinutes,
+          active_minutes: setGoalMinutes,
           calories: setGoalCalories,
         };
 
@@ -91,7 +91,7 @@ const Targets = () => {
       try {
         // Post for new goal
         const response = await fetch(
-          `${config.API_BASE_URL}/goals/${config.USER_ID}/${metric.toLowerCase()}?goal_value=${Number(newGoalValue)}`,
+          `${config.API_BASE_URL}/data/goals/${config.USER_ID}/${metric.toLowerCase()}?goal_value=${Number(newGoalValue)}`,
           {
             method: "POST",
             headers: { "accept": "application/json" },
@@ -109,7 +109,7 @@ const Targets = () => {
             setGoalSteps(Number(newGoalValue));
             text = `The ${metric.toLowerCase()} goal was updated successfully!`;
             break;
-          case "activity":
+          case "active_minutes":
             setGoalMinutes(Number(newGoalValue));
             text = "The active minutes goal was updated successfully!";
             break;
@@ -152,6 +152,9 @@ const Targets = () => {
     <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">
 
       <CustomHeader title="Adjust targets" showBackButton={true} />
+
+      <Text className="text-2xl  font-bold my-2">Select the target you want to change</Text>
+
       <TouchableOpacity
         onPress={() => {
           setSelectedGoal({ metric: "steps", currentTarget: goalSteps });
@@ -162,7 +165,7 @@ const Targets = () => {
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
-          setSelectedGoal({ metric: "activity", currentTarget: goalMinutes });
+          setSelectedGoal({ metric: "active_minutes", currentTarget: goalMinutes });
           setNewGoalValue(goalMinutes.toString());
           setIsModalVisible(true);
         }}>

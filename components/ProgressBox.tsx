@@ -28,7 +28,7 @@ const ProgressBox = ({ value, target, metric, progressBar, weeklyAverage }: { va
                 </View>
             )}
 
-            <Text className="text-base text-blue-500 mt-1">
+            <Text className="text-base font-bold text-blue-500 mt-1">
                 Last 7 day average: {weeklyAverage} {metric.toLowerCase()}
             </Text>
         </View>

@@ -36,6 +36,8 @@ import settings from "@/assets/icons/cog-solid.png";
 import sit from "@/assets/icons/sit.png";
 import forward from "@/assets/icons/forward-arrow.png";
 import heart from "@/assets/icons/heart.png";
+import question from "@/assets/icons/question.png";
+import bulb from "@/assets/icons/lightbulb-solid.png";
 
 export const images = {
     check,
@@ -78,5 +80,7 @@ export const icons = {
     settings,
     sit,
     forward,
-    heart
+    heart,
+    question,
+    bulb
 };

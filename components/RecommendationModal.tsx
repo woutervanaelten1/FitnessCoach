@@ -1,5 +1,4 @@
-import { icons } from "@/constants";
-import { Modal, View, Text, TouchableOpacity, Image } from "react-native";
+import { Modal, View, Text} from "react-native";
 import CustomButton from "./CustomButton";
 
 const RecommendationModal = ({ isVisible, onClose, recommendation, reason, benefit, metric, onAskChatbot }: {

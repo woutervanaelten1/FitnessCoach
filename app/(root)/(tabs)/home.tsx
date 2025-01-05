@@ -17,6 +17,7 @@ const Home = () => {
     benefit: string;
     based_on: string;
     metric: string;
+    question: string;
   }
 
 
@@ -29,10 +30,11 @@ const Home = () => {
   const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
 
   const fetchData = async () => {
+    // CHANGE CHATS TO CHAT
     try {
       const [dailyResponse, recommendationsResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}`)
+        fetch(`${config.API_BASE_URL}/chats/recommendations?date=${config.FIXED_DATE}`)
       ]);
 
 
@@ -62,11 +64,13 @@ const Home = () => {
     setModalVisible(true);
   };
 
-  const handleAskChatbot = () => {
+  const handleAskChatbot = (question: string) => {
+    if (!question.trim()) return; // Exit if something went wrong and the question is empty
+  
     // Navigate to chatbot screen, passing the recommendation context
     setModalVisible(false)
-    router.push("../(tabs)/chat/chat")
-    // router.push("../(tabs)/chat/chat" + selectedRecommendation?.recommendation);
+    const encodedQuestion = encodeURIComponent(question);
+    router.push(`../(tabs)/chat/chat?question=${encodedQuestion}`);
   };
 
 
@@ -120,7 +124,7 @@ const Home = () => {
         recommendation={selectedRecommendation?.recommendation}
         reason={selectedRecommendation?.reason}
         benefit={selectedRecommendation?.benefit}
-        onAskChatbot={handleAskChatbot}
+        onAskChatbot={() => handleAskChatbot(selectedRecommendation?.question || "")}
       />
     </ScrollView>
   );

@@ -1,8 +1,7 @@
 import ChatBubble from "@/components/ChatBubble";
-import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { ScrollView, Text, View } from "react-native";

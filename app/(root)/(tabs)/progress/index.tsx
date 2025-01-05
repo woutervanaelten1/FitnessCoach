@@ -26,7 +26,7 @@ const Targets = () => {
       const [todayResponse, weekResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}`)
+        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}`)
       ]);
 
       // Check if responses are ok

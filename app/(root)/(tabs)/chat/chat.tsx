@@ -2,7 +2,8 @@ import ChatBubble from "@/components/ChatBubble";
 import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
 import { icons } from "@/constants";
-import { useRef, useState } from "react";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const Chat = () => {
@@ -14,28 +15,32 @@ const Chat = () => {
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [conversationId, setConversationId] = useState<string | null>(null);
     const scrollViewRef = useRef<ScrollView | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const { question } = useLocalSearchParams();
+    const [hasSentInitialQuestion, setHasSentInitialQuestion] = useState(false);
 
-    const handleSendMessage = async () => {
-        if (!input.trim()) return; // Prevent sending empty messages
+    const handleSendMessage = useCallback(async (messageToSend: string) => {
+        if (!messageToSend) return; // Prevent sending empty messages
 
         // Add the user's message to the messages array
-        const userMessage = { id: Date.now().toString(), text: input, isUser: true };
+        const userMessage = { id: Date.now().toString(), text: messageToSend, isUser: true };
         setMessages((prevMessages) => [...prevMessages, userMessage]);
         setInput(''); // Clear input field
         setIsLoading(true);
 
         try {
             // Call your FastAPI endpoint using fetch
-            const response = await fetch(`${config.API_BASE_URL}/chat/test/chat`, {
+            const response = await fetch(`${config.API_BASE_URL}/chat/chat`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     user_id: config.USER_ID,
-                    message: input,
+                    message: messageToSend,
+                    conversation_id: conversationId || null
                 }),
             });
 
@@ -43,7 +48,16 @@ const Chat = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            console.log(conversationId)
+
             const data = await response.json();
+
+
+            // Set conversation ID if it is provided in the response
+            if (data.conversation_id) {
+                setConversationId(data.conversation_id);
+            }
+
 
             // Add chatbot's response to the messages array
             const botMessage = {
@@ -66,7 +80,42 @@ const Chat = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [conversationId]);
+
+    // useEffect(() => {
+    //     const sendPreFilledQuestion = async () => {
+    //         if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
+    //             setHasSentInitialQuestion(true); 
+    //             await handleSendMessage(decodeURIComponent(question));
+    //         }
+    //     };
+
+    //     // sendPreFilledQuestion();
+    // }, [question, hasSentInitialQuestion, handleSendMessage]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Reset state when the chat page becomes active
+            setMessages([]);
+            setConversationId(null);
+            setHasSentInitialQuestion(false);
+    
+            // Define a local function to send the pre-filled question
+            const sendPreFilledQuestion = async () => {
+                if (typeof question === "string" && question.trim()) {
+                    setHasSentInitialQuestion(true); // Mark as sent
+                    await handleSendMessage(decodeURIComponent(question));
+                }
+            };
+    
+            // Send pre-filled question after resetting the state
+            sendPreFilledQuestion();
+    
+        }, [question])
+    );
+      
+    
+
 
     return (
         <View className="flex-1 bg-white">
@@ -74,7 +123,12 @@ const Chat = () => {
                 title="Fitness Coach"
                 showBackButton={true}
                 rightButton={
-                    <TouchableOpacity className="bg-blue-500 rounded-full px-2 py-1">
+                    <TouchableOpacity className="bg-blue-500 rounded-full px-2 py-1"
+                        onPress={() => {
+                            setMessages([]);
+                            setConversationId(null);
+                        }}
+                    >
                         <Text className="text-white font-bold">New Chat</Text>
                     </TouchableOpacity>
                 }
@@ -114,7 +168,7 @@ const Chat = () => {
                         />
                         <TouchableOpacity
                             className="ml-3 bg-blue-500 rounded-full px-4 py-2 justify-center items-center"
-                            onPress={handleSendMessage}
+                            onPress={() => handleSendMessage(input)}
                         >
                             <Image source={icons.plane} tintColor="#fff" resizeMode="contain" className="w-5 h-5" />
                         </TouchableOpacity>
