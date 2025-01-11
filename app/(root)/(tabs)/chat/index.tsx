@@ -1,15 +1,39 @@
 import ChatBubble from "@/components/ChatBubble";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import config from "@/config";
+import React from 'react';
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 
 const Index = () => {
-  const messages = [
-    { id: "1", text: "How can I improve my sleep quality?", isUser: false },
-    { id: "2", text: "Tips to increase my running endurance based on previous runs.", isUser: false },
-    { id: "3", text: "Recommendations on new fitness goals.", isUser: false },
-  ];
+  interface Question {
+    question: string;
+  }
+  const [isLoading, setIsLoading] = useState(true);
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${config.API_BASE_URL}/chat/suggested_questions`);
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const data = await response.json();
+      setQuestions(data.questions || []);
+      console.log(questions)
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   return (
     <View className="flex-1 px-4 bg-white">
@@ -21,9 +45,26 @@ const Index = () => {
           Suggested conversations:
         </Text>
 
-        {messages.map((message) => (
-          <ChatBubble key={message.id} message={message.text} isUser={message.isUser} maxWidth={100} />
-        ))}
+        {isLoading ? (
+          <View>
+            <ActivityIndicator size="large" color="#307FE2" />
+            <Text className="text-base text-gray-500 mt-2">Loading suggested questions...</Text>
+          </View>
+        ) : questions.length > 0 ? (
+          <View>
+            {questions.map((question, index) => (
+              <ChatBubble
+                key={index}
+                message={question.question}
+                isUser={false}
+                maxWidth={100}
+                onPress={() => router.push(`/chat/chat?question=${question.question}`)}
+              />
+            ))}
+          </View>
+        ) : (
+          <Text className="text-base text-red-500">An error occurred while loading the questions.</Text>
+        )}
       </View>
 
       <View className="py-4 bg-white">

@@ -5,7 +5,7 @@ import { icons } from "@/constants";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea } from "victory-native";
+import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea, VictoryScatter } from "victory-native";
 
 const Dashboard = () => {
   const [steps, setSteps] = useState(0);
@@ -13,10 +13,12 @@ const Dashboard = () => {
   const [activeMinutes, setActiveMinutes] = useState(0);
   const [sleepData, setSleepData] = useState([]);
   const [heartRateData, setHeartRateData] = useState([]);
+  const [weightData, setWeightData] = useState([]);
+  const [minWeight, setMinWeight] = useState<number | null>(null);
+  const [maxWeight, setMaxWeight] = useState<number | null>(null);
+  const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
-
-
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -90,19 +92,21 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [todayResponse, sleepResponse, heartRateResponse] = await Promise.all([
+      const [todayResponse, sleepResponse, heartRateResponse, weightResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/heartrate/minute?bydate=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
       ]);
 
-      if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse) {
+      if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse || !weightResponse) {
         throw new Error("Failed to fetch data");
       }
 
       const todayDataArray = await todayResponse.json();
       const sleepDataArray = await sleepResponse.json();
       const heartRateDataArray = await heartRateResponse.json();
+      const weightDataArray = await weightResponse.json();
 
 
       // Today Data
@@ -111,6 +115,7 @@ const Dashboard = () => {
         setSteps(todayData.totalsteps);
         setCalories(todayData.calories);
         setActiveMinutes(todayData.veryactiveminutes);
+        setCurrentWeight(todayData.weightkg);
       }
 
       // Sleep Data
@@ -137,6 +142,26 @@ const Dashboard = () => {
           };
         });
         setHeartRateData(processedHeartRateData);
+      }
+
+      // Weight data
+      if (weightDataArray.available_data?.length > 0) {
+        const processedWeight = weightDataArray.available_data.map(
+          (item: { date: string; weightkg: number }) => {
+            const date = new Date(item.date);
+            const fixedDate = new Date(config.FIXED_DATE);
+            const options: Intl.DateTimeFormatOptions = { weekday: "short" };
+            return {
+              day: new Intl.DateTimeFormat("en-US", options).format(date),
+              weight: parseFloat(item.weightkg.toFixed(2)),
+              isFixedDate: date.toDateString() === fixedDate.toDateString(),
+            };
+          }
+        );
+        const weights = processedWeight.map((d: { day: string; weight: number }) => d.weight);
+        setMinWeight(Math.min(...weights) - 0.5); 
+        setMaxWeight(Math.max(...weights) + 0.5); 
+        setWeightData(processedWeight);
       }
 
     } catch (error) {
@@ -177,7 +202,7 @@ const Dashboard = () => {
       {/* Sleep Duration Section */}
       <Text className="text-black text-lg font-semibold mb-1">Sleep duration last week (hours)</Text>
       <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
-      <TouchableOpacity className="relative z-10" onPress={() => {router.push("/dashboard/sleepDetail");}}>
+      <TouchableOpacity className="relative z-10" onPress={() => { router.push("/dashboard/sleepDetail"); }}>
         <View pointerEvents="none" className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
           <VictoryChart height={224} theme={customThemeBarChart} >
             <VictoryAxis
@@ -221,6 +246,41 @@ const Dashboard = () => {
             style={customThemeLineChart.area.style}
           />
         </VictoryChart>
+      </View>
+
+      <View>
+        {/* Weight Section */}
+        <Text className="text-black text-lg font-semibold mb-1">Weight journey (in kgs)</Text>
+        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight} kg</Text></Text>
+        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+          <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
+            <VictoryAxis
+              tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
+              style={customThemeLineChart.axisBottom.style}
+            />
+            <VictoryAxis
+              dependentAxis
+              tickFormat={(t) => `${t}`}
+              style={customThemeLineChart.axisLeft.style}
+            />
+            <VictoryArea
+              data={weightData}
+              x="day"
+              y="weight"
+              interpolation="monotoneX"
+              style={customThemeLineChart.area.style}
+            />
+            {weightData.length > 0 && (
+              <VictoryScatter
+                data={[weightData[weightData.length - 1]]} // Last data point (today)
+                x="day"
+                y="weight"
+                size={3}
+                style={{ data: { fill: "#307FE2" } }}
+              />
+            )}
+          </VictoryChart>
+        </View>
       </View>
     </ScrollView>
   );

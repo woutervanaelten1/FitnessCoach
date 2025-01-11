@@ -68,7 +68,7 @@ const Targets = () => {
         const metricSetters = {
           steps: setGoalSteps,
           sleep: setGoalSleep,
-          activity: setGoalMinutes,
+          active_minutes: setGoalMinutes,
           calories: setGoalCalories,
         };
       
@@ -102,7 +102,7 @@ const Targets = () => {
       <ProgressBox value={activeMinutes} target={goalMinutes} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
       <ProgressBox value={sleep} target={goalSleep} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
       <ProgressBox value={calories} target={goalCalories} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
-      <CustomButton title="Check weight progress" />
+      <CustomButton onPress={() => router.push("/dashboard/weightDetail")} title="Check weight progress" />
       <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
     </ScrollView>
   );

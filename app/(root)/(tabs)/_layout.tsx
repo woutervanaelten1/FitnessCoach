@@ -155,6 +155,14 @@ const Layout = () => {
                         }}
                     />
                     <Tabs.Screen
+                        name="dashboard/weightDetail"
+                        options={{
+                            title: "Weight Overview",
+                            headerShown: false,
+                            href: null,
+                        }}
+                    />
+                    <Tabs.Screen
                         name="dashboard/dailyStep"
                         options={{
                             title: "Hourly Steps",

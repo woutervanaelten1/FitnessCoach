@@ -1,5 +1,5 @@
 import { icons } from "@/constants";
-import { router, useSegments } from "expo-router";
+import { router, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
@@ -7,12 +7,15 @@ const CustomHeader = ({ title, showBackButton = true, rightButton = null }: { ti
     const segments = useSegments();
 
     const handleBackPress = () => {
-        if (segments.length > 1) {
-            router.back();
+        const isOnTabScreen = segments.length === 1; // Top-level tabs have 1 segment
+      
+        if (!isOnTabScreen) {
+          // Go back in the stack if on a nested screen
+          router.back();
         } else {
-            router.push("/(root)/(tabs)/home");
+          console.log("Already on a main tab screen, no further back navigation.");
         }
-    };
+      };
 
     return (
         <View className="flex-row w-full items-center justify-between p-4 bg-white border-b border-gray-200">

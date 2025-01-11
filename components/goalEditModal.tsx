@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, Modal, ActivityIndicator, Image } from "react-native";
 import CustomButton from "./CustomButton";
 import config from "@/config";
@@ -10,45 +10,30 @@ const GoalEditModal = ({
     metric,
     onClose,
     onSave,
-    onChangeValue,
 }: {
     isVisible: boolean;
     goal: number;
     metric: string;
     onClose: () => void;
-    onSave: () => void;
-    onChangeValue: (value: string) => void;
+    onSave: (newGoal: number) => void;
 }) => {
-    interface GoalSuggestion {
-        new_goal: string;
-        content: string;
-    }
-
-    const [goalSuggestion, setGoalSuggestion] = useState<GoalSuggestion | null>(null);
+    const [inputValue, setInputValue] = useState<string>(goal.toString());
+    const [goalSuggestion, setGoalSuggestion] = useState<{ new_goal: string; content: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
-        setFetchError(false); // Reset error state before fetching
+        setFetchError(false);
         try {
             const response = await fetch(
                 `${config.API_BASE_URL}/chat/new_goal?date=${config.FIXED_DATE}&metric=${metric}&current_goal=${goal}`
             );
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch data");
-            }
+            if (!response.ok) throw new Error("Failed to fetch data");
 
             const data = await response.json();
             if (data?.suggestion) {
-                setGoalSuggestion({
-                    new_goal: data.suggestion.new_goal,
-                    content: data.suggestion.content,
-                });
-            }
-            else if (data?.error) {
-                setFetchError(true);
+                setGoalSuggestion({ new_goal: data.suggestion.new_goal, content: data.suggestion.content });
             } else {
                 setFetchError(true);
             }
@@ -62,9 +47,10 @@ const GoalEditModal = ({
 
     useEffect(() => {
         if (isVisible) {
-            fetchData(); // Fetch data when modal becomes visible
+            setInputValue(goal.toString()); // Reset input value when modal opens
+            fetchData();
         }
-    }, [isVisible, fetchData]);
+    }, [isVisible, fetchData, goal]);
 
     return (
         <Modal visible={isVisible} animationType="fade" transparent>
@@ -114,15 +100,14 @@ const GoalEditModal = ({
                     </View>
 
                     <TextInput
-                        value={goal.toString()}
-                        onChangeText={onChangeValue}
+                        value={inputValue}
+                        onChangeText={setInputValue}
                         keyboardType="numeric"
                         className="border border-gray-300 rounded-md p-3 text-center text-lg"
                         placeholder={`Enter new ${metric.toLowerCase()} goal`}
                     />
 
                     <View className="flex-row justify-between mt-4">
-                        {/* Cancel Button */}
                         <CustomButton
                             title="Cancel"
                             onPress={onClose}
@@ -130,7 +115,13 @@ const GoalEditModal = ({
                         />
                         <CustomButton
                             title="Save"
-                            onPress={onSave}
+                            onPress={() => {
+                                const numericValue = parseFloat(inputValue);
+                                if (!isNaN(numericValue)) {
+                                    onSave(numericValue); // Pass the latest input value
+                                    onClose();
+                                }
+                            }}
                             className="w-1/2 px-4 ml-1"
                         />
                     </View>

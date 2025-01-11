@@ -84,14 +84,15 @@ const Targets = () => {
     fetchData();
   }, []);
 
-  const handleSaveNewGoal = async () => {
+  const handleSaveNewGoal = async (goalValue: number) => {
     if (selectedGoal) {
       const { metric } = selectedGoal;
+      console.log(goalValue)
 
       try {
         // Post for new goal
         const response = await fetch(
-          `${config.API_BASE_URL}/data/goals/${config.USER_ID}/${metric.toLowerCase()}?goal_value=${Number(newGoalValue)}`,
+          `${config.API_BASE_URL}/data/goals/${config.USER_ID}/${metric.toLowerCase()}?goal_value=${Number(goalValue)}`,
           {
             method: "POST",
             headers: { "accept": "application/json" },
@@ -125,7 +126,7 @@ const Targets = () => {
             console.warn(`Unknown metric: ${metric}`);
             break;
         }
-
+        fetchData();
         Toast.show({
           type: "success",
           text1: text,
@@ -195,8 +196,11 @@ const Targets = () => {
         goal={Number(newGoalValue)}
         metric={selectedGoal?.metric || ""}
         onClose={() => setIsModalVisible(false)}
-        onSave={handleSaveNewGoal}
-        onChangeValue={setNewGoalValue}
+        onSave={(newGoal) => {
+          handleSaveNewGoal(newGoal); // Directly pass the latest input value
+          setNewGoalValue(newGoal.toString()); // Optionally update the state
+        }}
+      // onChangeValue={setNewGoalValue}
       />
       <Toast />
     </ScrollView>

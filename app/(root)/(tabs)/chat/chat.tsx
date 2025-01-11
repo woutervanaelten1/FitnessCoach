@@ -3,7 +3,7 @@ import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
 import { icons } from "@/constants";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const Chat = () => {
@@ -24,15 +24,31 @@ const Chat = () => {
     const handleSendMessage = useCallback(async (messageToSend: string) => {
         if (!messageToSend) return; // Prevent sending empty messages
 
+        setInput(''); // Clear input field
+        setIsLoading(false);
+
         // Add the user's message to the messages array
         const userMessage = { id: Date.now().toString(), text: messageToSend, isUser: true };
-        setMessages((prevMessages) => [...prevMessages, userMessage]);
-        setInput(''); // Clear input field
+        // setMessages((prevMessages) => [...prevMessages, userMessage]);
+        // Show a temporary placeholder for the user's message
+        const placeholderMessage = { id: Date.now().toString(), text: "Sending...", isUser: true };
+        setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
+        // Introduce a delay (e.g., 500ms) before showing the actual user's message
+        setTimeout(() => {
+            setMessages((prevMessages) => 
+                prevMessages.map((msg) =>
+                    msg.id === placeholderMessage.id
+                        ? { ...msg, text: messageToSend } // Replace placeholder with actual message
+                        : msg
+                )
+            );
+        }, 500); // Delay duration
+
         setIsLoading(true);
 
         try {
-            // Call your FastAPI endpoint using fetch
-            const response = await fetch(`${config.API_BASE_URL}/chat/chat`, {
+            // Call FastAPI endpoint using fetch
+            const response = await fetch(`${config.API_BASE_URL}/chat/test/chat`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,12 +68,10 @@ const Chat = () => {
 
             const data = await response.json();
 
-
             // Set conversation ID if it is provided in the response
             if (data.conversation_id) {
                 setConversationId(data.conversation_id);
             }
-
 
             // Add chatbot's response to the messages array
             const botMessage = {
@@ -99,22 +113,23 @@ const Chat = () => {
             setMessages([]);
             setConversationId(null);
             setHasSentInitialQuestion(false);
-    
+
             // Define a local function to send the pre-filled question
+            // If not working ==> Remove the !hasSentInitialQuestion
             const sendPreFilledQuestion = async () => {
-                if (typeof question === "string" && question.trim()) {
+                if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
                     setHasSentInitialQuestion(true); // Mark as sent
                     await handleSendMessage(decodeURIComponent(question));
                 }
             };
-    
+
             // Send pre-filled question after resetting the state
             sendPreFilledQuestion();
-    
+
         }, [question])
     );
-      
-    
+
+
 
 
     return (

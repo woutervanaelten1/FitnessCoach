@@ -2,8 +2,8 @@ import ChatBubble from "@/components/ChatBubble";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 const EarlierChats = () => {
@@ -33,9 +33,11 @@ const EarlierChats = () => {
 
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   return (
     <ScrollView className="flex-1 px-3 bg-white">

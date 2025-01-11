@@ -65,7 +65,7 @@ const Home = () => {
   };
 
   const handleAskChatbot = (question: string) => {
-    if (!question.trim()) return; // Exit if something went wrong and the question is empty
+    if (!question.trim()) return; // Exit if something went wrong or the question is empty
   
     // Navigate to chatbot screen, passing the recommendation context
     setModalVisible(false)
