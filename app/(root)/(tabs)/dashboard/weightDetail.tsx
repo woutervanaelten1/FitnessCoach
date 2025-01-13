@@ -1,8 +1,8 @@
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
-import GoalEditModal from "@/components/goalEditModal";
 import IconTextBox from "@/components/IconTextBox";
 import InputModal from "@/components/inputModal";
+import LoadingErrorView from "@/components/LoadingErrorView";
 import config from "@/config";
 import { icons } from "@/constants";
 import { useEffect, useState } from "react";
@@ -13,13 +13,13 @@ import { VictoryArea, VictoryAxis, VictoryChart, VictoryLabel, VictoryScatter, V
 const StepDetail = () => {
     const [currentWeight, setCurrentWeight] = useState(0);
     const [targetWeight, setTargetWeight] = useState(0);
-    const [weightData, setWeightData] = useState([]);
+    const [weightData, setWeightData] = useState<{ day: string; weight: number; isFixedDate?: boolean }[]>([]);
     const [minWeight, setMinWeight] = useState<number | null>(null);
     const [maxWeight, setMaxWeight] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
     const [isGoalEditModalVisible, setIsGoalEditModalVisible] = useState(false);
     const [isInputModalVisible, setIsInputModalVisible] = useState(false);
-
     const [newGoalValue, setNewGoalValue] = useState("");
 
     const customThemeLineChart = {
@@ -62,6 +62,8 @@ const StepDetail = () => {
 
     const fetchData = async () => {
         try {
+            setIsLoading(true);
+            setHasError(false);
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
                 fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
@@ -110,6 +112,7 @@ const StepDetail = () => {
 
         } catch (error) {
             console.error("Error fetching data:", error);
+            setHasError(true);
         } finally {
             setIsLoading(false);
         }
@@ -119,7 +122,20 @@ const StepDetail = () => {
         fetchData();
     }, []);
 
-    const handleSaveNewGoal = async (inputTarget:number) => {
+    if (isLoading || hasError) {
+        return (
+            <LoadingErrorView
+                isLoading={isLoading}
+                hasError={hasError}
+                onRetry={fetchData}
+                loadingText="Loading your weight data..."
+                errorText="Failed to load your weight data. Do you want to try again?"
+                headerTitle="Targets & Progress"
+            />
+        );
+    }
+
+    const handleSaveNewGoal = async (inputTarget: number) => {
         try {
             // Post for new goal
             const response = await fetch(
@@ -156,50 +172,70 @@ const StepDetail = () => {
     };
 
 
-    const handleLogWeight = async (inputWeight:number) => {
+    const handleLogWeight = async (inputWeight: number) => {
         try {
             const heightInMeters = 1.60; // Example height
             const weight = Number(inputWeight);
             const bmi = (weight / (heightInMeters ** 2)).toFixed(2);
             const currentTimestamp = new Date();
             const fixedDateWithCurrentTime = `${config.FIXED_DATE} ${currentTimestamp.toTimeString().split(' ')[0]}`;
-    
+
             const logEntry = {
-                id: config.USER_ID,
-                weightkg: weight,
                 bmi: Number(bmi),
-                timestamp: fixedDateWithCurrentTime,
-                date: config.FIXED_DATE
+                timestamp: fixedDateWithCurrentTime
             };
-    
-            // Post request to add the weight log entry
-            console.log(logEntry);
-            const response = await fetch(`${config.API_BASE_URL}/data/weight_log/add`, {
+
+            // Construct the endpoint URL with query parameters
+            const endpointUrl = `${config.API_BASE_URL}/data/weight_log/update_weight/${config.USER_ID}?date=${config.FIXED_DATE}&weight=${weight}`;
+
+            // Send POST request to update the weight log entry
+            const response = await fetch(endpointUrl, {
                 method: "POST",
-                headers: { 
+                headers: {
                     "accept": "application/json",
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(logEntry)
+                body: JSON.stringify(logEntry) // Include only necessary data in the body
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Failed to log weight");
+                throw new Error(errorData.detail || "Failed to update weight log");
             }
 
             setCurrentWeight(inputWeight);
-    
+
+            setWeightData((prevData) => {
+                const fixedDayName = new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(config.FIXED_DATE));
+
+                const updatedData = prevData.map((entry) => {
+                    return entry.day === fixedDayName
+                        ? { ...entry, weight: inputWeight }
+                        : entry;
+                });
+
+                const dateExists = updatedData.some((entry) => entry.day === fixedDayName);
+                if (!dateExists) {
+                    updatedData.push({
+                        day: fixedDayName,
+                        weight: inputWeight,
+                        isFixedDate: true
+                    });
+                }
+
+                return updatedData;
+            });
+
             Toast.show({
                 type: "success",
-                text1: "Weight logged",
-                text2: "Your new weight entry has been logged successfully."
+                text1: "Weight Updated",
+                text2: "Your weight log entry has been updated successfully."
             });
         } catch (error) {
-            console.error("Error logging weight:", error instanceof Error ? error.message : error);
+            console.error("Error updating weight log:", error instanceof Error ? error.message : error);
             Toast.show({
                 type: "error",
-                text1: "Failed to log weight",
+                text1: "Failed to Update Weight",
                 text2: "An error occurred. Please try again."
             });
         }
@@ -217,7 +253,7 @@ const StepDetail = () => {
             </View>
             <View className="flex-row justify-between">
                 <View className="flex-1 mr-1">
-                    <CustomButton title="Log Weight" onPress={() => setIsInputModalVisible(true)}/>
+                    <CustomButton title="Log Weight" onPress={() => setIsInputModalVisible(true)} />
                 </View>
                 <View className="flex-1 ml-1">
                     <CustomButton title="New Target" onPress={() => setIsGoalEditModalVisible(true)} />

@@ -30,7 +30,7 @@ const Profile = () => {
           </Text>
         </View>
         <View className="flex-row items-center mt-3">
-          <Text className="text-blue-500 text-xl font-bold">John Doe</Text>
+          <Text className="text-blue-500 text-xl font-bold">Wouter Vanaelten</Text>
           <Image
             source={icons.male}
             className="w-5 h-5 ml-2"

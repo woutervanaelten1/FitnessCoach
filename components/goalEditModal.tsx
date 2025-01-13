@@ -18,7 +18,7 @@ const GoalEditModal = ({
     onSave: (newGoal: number) => void;
 }) => {
     const [inputValue, setInputValue] = useState<string>(goal.toString());
-    const [goalSuggestion, setGoalSuggestion] = useState<{ new_goal: string; content: string } | null>(null);
+    const [goalSuggestion, setGoalSuggestion] = useState<{ new_goal: string; justification: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
 
@@ -33,7 +33,7 @@ const GoalEditModal = ({
 
             const data = await response.json();
             if (data?.suggestion) {
-                setGoalSuggestion({ new_goal: data.suggestion.new_goal, content: data.suggestion.content });
+                setGoalSuggestion({ new_goal: data.suggestion.new_goal, justification: data.suggestion.justification });
             } else {
                 setFetchError(true);
             }
@@ -89,7 +89,7 @@ const GoalEditModal = ({
                                 </View>
                                 <View className="flex-row items-start mb-2">
                                     <Image source={icons.question} tintColor="#307FE2" resizeMode="contain" className="w-5 h-5 mr-2 mt-1" />
-                                    <Text className="text-base text-gray-700">{goalSuggestion.content}</Text>
+                                    <Text className="text-base text-gray-700">{goalSuggestion.justification}</Text>
                                 </View>
                             </View>
                         ) : (

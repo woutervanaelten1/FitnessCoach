@@ -1,6 +1,7 @@
 import ChatBubble from "@/components/ChatBubble";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import LoadingErrorView from "@/components/LoadingErrorView";
 import config from "@/config";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -16,10 +17,13 @@ const EarlierChats = () => {
   }
 
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
   const fetchData = async () => {
     try {
+      setIsLoading(true);
+      setHasError(false);
       const response = await fetch(`${config.API_BASE_URL}/data/conversation_subjects/${config.USER_ID}`);
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -27,6 +31,7 @@ const EarlierChats = () => {
       setSubjects(data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -38,6 +43,19 @@ const EarlierChats = () => {
       fetchData();
     }, [])
   );
+
+  if (isLoading || hasError) {
+    return (
+      <LoadingErrorView
+        isLoading={isLoading}
+        hasError={hasError}
+        onRetry={fetchData}
+        loadingText="Loading your earlier conversations..."
+        errorText="Failed to load your earlier conversations. Do you want to try again?"
+        headerTitle="Fitness Dashboard"
+      />
+    );
+  }
 
   return (
     <ScrollView className="flex-1 px-3 bg-white">

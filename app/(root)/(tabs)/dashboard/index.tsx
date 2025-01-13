@@ -2,10 +2,13 @@ import CustomHeader from "@/components/CustomHeader";
 import IconTextBox from "@/components/IconTextBox";
 import config from "@/config";
 import { icons } from "@/constants";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea, VictoryScatter } from "victory-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomButton from "@/components/CustomButton";
+import LoadingErrorView from "@/components/LoadingErrorView";
 
 const Dashboard = () => {
   const [steps, setSteps] = useState(0);
@@ -13,11 +16,12 @@ const Dashboard = () => {
   const [activeMinutes, setActiveMinutes] = useState(0);
   const [sleepData, setSleepData] = useState([]);
   const [heartRateData, setHeartRateData] = useState([]);
-  const [weightData, setWeightData] = useState([]);
+  const [weightData, setWeightData] = useState<{ day: string; weight: number }[]>([]);
   const [minWeight, setMinWeight] = useState<number | null>(null);
   const [maxWeight, setMaxWeight] = useState<number | null>(null);
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
 
   const customThemeBarChart = {
@@ -92,6 +96,8 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
+      setIsLoading(true);
+      setHasError(false);
       const [todayResponse, sleepResponse, heartRateResponse, weightResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${config.FIXED_DATE}`),
@@ -99,7 +105,7 @@ const Dashboard = () => {
         fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
       ]);
 
-      if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse || !weightResponse) {
+      if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse.ok || !weightResponse.ok) {
         throw new Error("Failed to fetch data");
       }
 
@@ -108,8 +114,7 @@ const Dashboard = () => {
       const heartRateDataArray = await heartRateResponse.json();
       const weightDataArray = await weightResponse.json();
 
-
-      // Today Data
+      // Update state with the fetched data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
       if (todayData) {
         setSteps(todayData.totalsteps);
@@ -118,63 +123,103 @@ const Dashboard = () => {
         setCurrentWeight(todayData.weightkg);
       }
 
-      // Sleep Data
+      // Process and set sleep data
       if (sleepDataArray?.available_sleep_data?.length > 0) {
         const processedSleepData = sleepDataArray.available_sleep_data.map((item: { date: string; total_sleep_minutes: number }) => {
           const date = new Date(item.date);
-          const fixedDate = new Date(config.FIXED_DATE);
           const options: Intl.DateTimeFormatOptions = { weekday: "short" };
           return {
             day: new Intl.DateTimeFormat("en-US", options).format(date),
             hours: parseFloat((item.total_sleep_minutes / 60).toFixed(2)),
-            isFixedDate: date.toDateString() === fixedDate.toDateString(),
           };
         });
         setSleepData(processedSleepData);
       }
 
-      // Heart rate data
+      // Process and set heart rate data
       if (heartRateDataArray?.heart_rate_values?.length > 0) {
-        const processedHeartRateData = heartRateDataArray.heart_rate_values.map((value: number, index: number) => {
-          return {
-            time: index,
-            rate: value,
-          };
-        });
+        const processedHeartRateData = heartRateDataArray.heart_rate_values.map((value: number, index: number) => ({
+          time: index,
+          rate: value,
+        }));
         setHeartRateData(processedHeartRateData);
       }
 
-      // Weight data
+      // Process and set weight data
       if (weightDataArray.available_data?.length > 0) {
-        const processedWeight = weightDataArray.available_data.map(
-          (item: { date: string; weightkg: number }) => {
-            const date = new Date(item.date);
-            const fixedDate = new Date(config.FIXED_DATE);
-            const options: Intl.DateTimeFormatOptions = { weekday: "short" };
-            return {
-              day: new Intl.DateTimeFormat("en-US", options).format(date),
-              weight: parseFloat(item.weightkg.toFixed(2)),
-              isFixedDate: date.toDateString() === fixedDate.toDateString(),
-            };
-          }
-        );
+        const processedWeight = weightDataArray.available_data.map((item: { date: string; weightkg: number }) => {
+          const date = new Date(item.date);
+          const day = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
+          return { day, weight: item.weightkg };
+        });
+
         const weights = processedWeight.map((d: { day: string; weight: number }) => d.weight);
-        setMinWeight(Math.min(...weights) - 0.5); 
-        setMaxWeight(Math.max(...weights) + 0.5); 
+        setMinWeight(Math.min(...weights) - 0.5);
+        setMaxWeight(Math.max(...weights) + 0.5);
         setWeightData(processedWeight);
       }
 
+      // Cache the data in AsyncStorage
+      await AsyncStorage.setItem(
+        'dashboardData',
+        JSON.stringify({ steps, calories, activeMinutes, sleepData, heartRateData, weightData, currentWeight, minWeight, maxWeight })
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
-
   };
 
   useEffect(() => {
-    fetchData();
+    const loadCachedData = async () => {
+      try {
+        const cachedData = await AsyncStorage.getItem('dashboardData');
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          setSteps(parsedData.steps);
+          setCalories(parsedData.calories);
+          setActiveMinutes(parsedData.activeMinutes);
+          setSleepData(parsedData.sleepData);
+          setHeartRateData(parsedData.heartRateData);
+          setWeightData(parsedData.weightData);
+          setCurrentWeight(parsedData.currentWeight);
+          setMinWeight(parsedData.minWeight);
+          setMaxWeight(parsedData.maxWeight);
+          setIsLoading(false); // Show cached data immediately
+        }
+      } catch (error) {
+        console.error("Error loading cached data:", error);
+      }
+
+      // Fetch fresh data in the background
+      fetchData();
+    };
+
+    loadCachedData();
   }, []);
+
+  // Fetch fresh data when the page is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
+
+
+  if (isLoading || hasError) {
+    return (
+      <LoadingErrorView
+        isLoading={isLoading}
+        hasError={hasError}
+        onRetry={fetchData}
+        loadingText="Loading your data..."
+        errorText="Failed to load your data. Do you want to try again?"
+        headerTitle="Fitness Dashboard"
+      />
+    );
+  }
 
   return (
     <ScrollView className="px-3 flex-1 bg-white">
@@ -277,6 +322,13 @@ const Dashboard = () => {
                 y="weight"
                 size={3}
                 style={{ data: { fill: "#307FE2" } }}
+                labels={({ datum }) => `${datum.weight} kg`}
+                labelComponent={
+                  <VictoryLabel
+                    dy={-12}
+                    style={{ fontSize: 12, fill: "#307FE2" }}
+                  />
+                }
               />
             )}
           </VictoryChart>

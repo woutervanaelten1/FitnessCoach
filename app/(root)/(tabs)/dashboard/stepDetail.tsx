@@ -1,7 +1,8 @@
-import ChatBubble from "@/components/ChatBubble";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import DetailView from "@/components/DetailComponent";
 import IconTextBox from "@/components/IconTextBox";
+import LoadingErrorView from "@/components/LoadingErrorView";
 import ProgressBar from "@/components/ProgressBar";
 import config from "@/config";
 import { icons } from "@/constants";
@@ -16,6 +17,7 @@ const StepDetail = () => {
     const [distance, setDistance] = useState(0);
     const [stepData, setStepData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
     const [detailLoading, setDetailLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
@@ -57,6 +59,8 @@ const StepDetail = () => {
 
     const fetchData = async () => {
         try {
+            setIsLoading(true);
+            setHasError(false);
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
                 fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
@@ -105,6 +109,7 @@ const StepDetail = () => {
 
         } catch (error) {
             console.error("Error fetching data:", error);
+            setHasError(true);
         } finally {
             setIsLoading(false);
         }
@@ -131,6 +136,20 @@ const StepDetail = () => {
         fetchData();
         fetchDetail();
     }, []);
+
+
+    if (isLoading || hasError) {
+        return (
+            <LoadingErrorView
+                isLoading={isLoading}
+                hasError={hasError}
+                onRetry={fetchData}
+                loadingText="Loading your step data..."
+                errorText="Failed to load your step data. Do you want to try again?"
+                headerTitle="Targets & Progress"
+            />
+        );
+    }
 
     return (
         <ScrollView className="flex-1 px-4 bg-white">
@@ -165,28 +184,10 @@ const StepDetail = () => {
                         />
                     </View>
                 ) : detail ? (
-                    detail.type === "question" ? (
-                        <View className="mt-4 items-center">
-                            <ChatBubble
-                                message={detail.content}
-                                isUser={false}
-                                maxWidth={100}
-                            />
-
-                            <CustomButton
-                                title="Check it out"
-                                onPress={() => console.log("Check it out button clicked")}
-                                className="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
-                            />
-                        </View>
-                    ) : (
-                        <View>
-                            <Text className="text-lg font-bold">{detail.type}</Text>
-                            <View className="items-center px-4">
-                                <Text className="text-blue-500 text-lg font-bold">{detail.content}</Text>
-                            </View>
-                        </View>
-                    )
+                    <DetailView
+                        detail={{ type: detail.type, content: detail.content }}
+                        onCheckOutPress={() => console.log('Check it out button clicked')}
+                    />
                 ) : (
                     <Text className="text-gray-500 text-lg">No details found.</Text>
                 )}

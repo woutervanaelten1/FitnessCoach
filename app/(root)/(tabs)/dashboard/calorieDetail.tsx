@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
 import CustomButton from "@/components/CustomButton";
-import ChatBubble from "@/components/ChatBubble";
+import DetailView from "@/components/DetailComponent";
+import LoadingErrorView from "@/components/LoadingErrorView";
 
 const CalorieDetail = () => {
   const [calories, setCalories] = useState(0);
@@ -15,6 +16,7 @@ const CalorieDetail = () => {
   const [hourlyCalories, setHourlyCalorie] = useState<{ time: number; calories: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
@@ -61,6 +63,8 @@ const CalorieDetail = () => {
 
   const fetchData = async () => {
     try {
+      setIsLoading(true);
+      setHasError(false);
       const [todayResponse, hourlyResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}`),
@@ -102,6 +106,7 @@ const CalorieDetail = () => {
 
     } catch (error) {
       console.error("Error fetching data:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +133,19 @@ const CalorieDetail = () => {
     fetchData();
     fetchDetail();
   }, []);
+
+  if (isLoading || hasError) {
+    return (
+      <LoadingErrorView
+        isLoading={isLoading}
+        hasError={hasError}
+        onRetry={fetchData}
+        loadingText="Loading your calorie data..."
+        errorText="Failed to load your calorie data. Do you want to try again?"
+        headerTitle="Targets & Progress"
+      />
+    );
+  }
 
   return (
     <ScrollView className="flex-1 px-4 bg-white">
@@ -156,29 +174,10 @@ const CalorieDetail = () => {
             />
           </View>
         ) : detail ? (
-          detail.type === "question" ? (
-            <View className="mt-4 items-center">
-              <Text className="text-lg font-bold">Suggested question</Text>
-              <ChatBubble
-                message={detail.content}
-                isUser={false}
-                maxWidth={100}
-              />
-
-              <CustomButton
-                title="Check it out"
-                onPress={() => console.log("Check it out button clicked")}
-                className="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
-              />
-            </View>
-          ) : (
-            <View>
-              <Text className="text-lg font-bold">{detail.type}</Text>
-              <View className="items-center px-4">
-                <Text className="text-blue-500 text-lg font-bold">{detail.content}</Text>
-              </View>
-            </View>
-          )
+          <DetailView
+            detail={{ type: detail.type, content: detail.content}}
+            onCheckOutPress={() => console.log('Check it out button clicked')}
+          />
         ) : (
           <Text className="text-gray-500 text-lg">No details found.</Text>
         )}

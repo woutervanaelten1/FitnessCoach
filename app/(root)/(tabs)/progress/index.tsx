@@ -1,5 +1,6 @@
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import LoadingErrorView from "@/components/LoadingErrorView";
 import ProgressBox from "@/components/ProgressBox";
 import config from "@/config";
 import { router, useFocusEffect } from "expo-router";
@@ -20,9 +21,13 @@ const Targets = () => {
   const [goalMinutes, setGoalMinutes] = useState(0);
   const [goalCalories, setGoalCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
 
   const fetchData = async () => {
     try {
+      setIsLoading(true);
+      setHasError(false);
       const [todayResponse, weekResponse, goalResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
@@ -83,6 +88,7 @@ const Targets = () => {
 
     } catch (error) {
       console.error("Error fetching data:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +99,19 @@ const Targets = () => {
       fetchData();
     }, [])
   );
+
+  if (isLoading || hasError) {
+    return (
+      <LoadingErrorView
+        isLoading={isLoading}
+        hasError={hasError}
+        onRetry={fetchData}
+        loadingText="Loading your goals..."
+        errorText="Failed to load your goals. Do you want to try again?"
+        headerTitle="Targets & Progress"
+      />
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">

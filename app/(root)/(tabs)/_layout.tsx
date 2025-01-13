@@ -30,7 +30,7 @@ const Layout = () => {
                             justifyContent: "space-between",
                             alignItems: "center",
                             flexDirection: "row",
-                            marginBottom: -25,
+                            // marginBottom: -25,
                         },
                     }}>
                     <Tabs.Screen
