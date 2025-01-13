@@ -2,13 +2,12 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import CustomButton from './CustomButton';
 import ChatBubble from './ChatBubble';
+import { router } from 'expo-router';
 
 const DetailView = ({
     detail,
-    onCheckOutPress,
 }: {
     detail: { type: string; content: string };
-    onCheckOutPress?: () => void;
 }) => {
     return (
         <View className="mt-4">
@@ -18,7 +17,7 @@ const DetailView = ({
                     <ChatBubble message={detail.content} isUser={false} maxWidth={100} />
                     <CustomButton
                         title="Check it out"
-                        onPress={onCheckOutPress}
+                        onPress={() => router.push(`../chat/chat?question=${detail.content}`)}
                         className="mt-1 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
                     />
                 </View>

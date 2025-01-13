@@ -6,6 +6,7 @@ import { ScrollView, Text, View, TouchableOpacity, Image } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { icons } from "@/constants";
+import LoadingErrorView from "@/components/LoadingErrorView";
 
 const DailyStep = () => {
     const [steps, setSteps] = useState(0);
@@ -14,6 +15,8 @@ const DailyStep = () => {
     const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
     const [isDatePickerOpen, setDatePickerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
 
     const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
     const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -56,13 +59,15 @@ const DailyStep = () => {
 
     const fetchStepData = async (date: Date) => {
         try {
+            setIsLoading(true);
+            setHasError(false);
             const formattedDate = date.toISOString().split("T")[0]; // Format as yyyy-MM-dd
             setIsLoading(true);
 
             const [hourlyResponse, todayResponse, goalResponse] = await Promise.all([
                 fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${formattedDate}`),
                 fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}`),
-                fetch(`${config.API_BASE_URL}/goals/${config.USER_ID}/steps`)
+                fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/steps`)
             ]);
 
             if (!hourlyResponse.ok || !todayResponse.ok || !goalResponse.ok) {
@@ -98,6 +103,7 @@ const DailyStep = () => {
             setProcessedStepData(processedData);
         } catch (error) {
             console.error("Error fetching data:", error);
+            setHasError(true);
         } finally {
             setIsLoading(false);
         }
@@ -112,6 +118,19 @@ const DailyStep = () => {
     useEffect(() => {
         fetchStepData(selectedDate);
     }, [selectedDate]);
+
+    if (isLoading || hasError) {
+        return (
+          <LoadingErrorView
+            isLoading={isLoading}
+            hasError={hasError}
+            onRetry={() => fetchStepData(selectedDate)}
+            loadingText="Loading your step data..."
+            errorText="Failed to load your step data. Do you want to try again?"
+            headerTitle="Targets & Progress"
+          />
+        );
+      }
 
     return (
         <ScrollView className="flex-1 px-4 bg-white">

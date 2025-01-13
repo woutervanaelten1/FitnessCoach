@@ -202,7 +202,6 @@ const SleepDetail = () => {
         ) : detail ? (
           <DetailView
             detail={{ type: detail.type, content: detail.content }}
-            onCheckOutPress={() => console.log('Check it out button clicked')}
           />
         ) : (
           <Text className="text-gray-500 text-lg">No details found.</Text>

@@ -20,7 +20,6 @@ const StepDetail = () => {
     const [hasError, setHasError] = useState(false);
     const [isGoalEditModalVisible, setIsGoalEditModalVisible] = useState(false);
     const [isInputModalVisible, setIsInputModalVisible] = useState(false);
-    const [newGoalValue, setNewGoalValue] = useState("");
 
     const customThemeLineChart = {
         ...VictoryTheme.material,

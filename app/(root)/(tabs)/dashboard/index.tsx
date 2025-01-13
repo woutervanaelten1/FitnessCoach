@@ -4,10 +4,9 @@ import config from "@/config";
 import { icons } from "@/constants";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea, VictoryScatter } from "victory-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomButton from "@/components/CustomButton";
 import LoadingErrorView from "@/components/LoadingErrorView";
 
 const Dashboard = () => {
