@@ -16,9 +16,12 @@ const DetailView = ({
                     <Text className="text-lg font-bold">Suggested question</Text>
                     <ChatBubble message={detail.content} isUser={false} maxWidth={100} />
                     <CustomButton
-                        title="Check it out"
-                        onPress={() => router.push(`../chat/chat?question=${detail.content}`)}
-                        className="mt-1 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
+                        title="Check it out!"
+                        onPress={() => {
+                            const encodedContent = encodeURIComponent(detail.content);
+                            router.push(`../chat/chat?question=${encodedContent}`)
+                        }}
+                        className="mt-1 w-3/4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
                     />
                 </View>
             ) : (

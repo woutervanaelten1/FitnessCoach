@@ -33,7 +33,6 @@ const Chat = () => {
         // Show a temporary placeholder for the user's message
         const placeholderMessage = { id: Date.now().toString(), text: "Sending...", isUser: true };
         setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
-        // Introduce a delay (e.g., 500ms) before showing the actual user's message
         setTimeout(() => {
             setMessages((prevMessages) => 
                 prevMessages.map((msg) =>
@@ -42,13 +41,13 @@ const Chat = () => {
                         : msg
                 )
             );
-        }, 500); // Delay duration
+        }, 1000); // Delay duration
 
         setIsLoading(true);
 
         try {
             // Call FastAPI endpoint using fetch
-            const response = await fetch(`${config.API_BASE_URL}/chat/test/chat`, {
+            const response = await fetch(`${config.API_BASE_URL}/chat/chat`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,7 +63,6 @@ const Chat = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            console.log(conversationId)
 
             const data = await response.json();
 
@@ -117,8 +115,9 @@ const Chat = () => {
             // Define a local function to send the pre-filled question
             // If not working ==> Remove the !hasSentInitialQuestion
             const sendPreFilledQuestion = async () => {
-                if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
-                    setHasSentInitialQuestion(true); // Mark as sent
+                if (typeof question === "string" && question.trim()) {
+                    // if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
+                    // setHasSentInitialQuestion(true); // Mark as sent
                     await handleSendMessage(decodeURIComponent(question));
                 }
             };

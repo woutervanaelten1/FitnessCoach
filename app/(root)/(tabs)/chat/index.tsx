@@ -66,7 +66,10 @@ const Index = () => {
                   message={question.question}
                   isUser={false}
                   maxWidth={100}
-                  onPress={() => router.push(`/chat/chat?question=${question.question}`)}
+                  onPress={() => {
+                    const encodedContent = encodeURIComponent(question.question);
+                    router.push(`/chat/chat?question=${encodedContent}`)
+                  }}
                 />
               ))}
             </View>

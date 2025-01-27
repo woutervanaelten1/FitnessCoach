@@ -34,7 +34,7 @@ const Home = () => {
     try {
       const [dailyResponse, recommendationsResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/chats/recommendations?date=${config.FIXED_DATE}`)
+        fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}`)
       ]);
 
 

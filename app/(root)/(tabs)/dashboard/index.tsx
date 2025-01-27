@@ -22,6 +22,9 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
+  const fixedDate = new Date(config.FIXED_DATE);
+  fixedDate.setDate(fixedDate.getDate() - 1); // Subtract 1 day
+  const yesterday = fixedDate.toISOString().split('T')[0];
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -99,7 +102,7 @@ const Dashboard = () => {
       setHasError(false);
       const [todayResponse, sleepResponse, heartRateResponse, weightResponse] = await Promise.all([
         fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${yesterday}`),
         fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${config.FIXED_DATE}`),
         fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
       ]);

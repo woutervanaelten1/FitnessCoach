@@ -11,6 +11,7 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } fro
 
 const SleepDetail = () => {
   const [sleepHours, setSleepHours] = useState(0);
+  const [inBedHours, setInBedHours] = useState(0);
   const [sleepGoal, setSleepGoal] = useState(0);
   const [sleepPercentage, setSleepPercentage] = useState(0);
   const [sleepData, setSleepData] = useState([]);
@@ -19,6 +20,9 @@ const SleepDetail = () => {
   const [detailLoading, setDetailLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+  const fixedDate = new Date(config.FIXED_DATE);
+  fixedDate.setDate(fixedDate.getDate() - 1); // Subtract 1 day
+  const yesterday = fixedDate.toISOString().split('T')[0];
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -64,9 +68,11 @@ const SleepDetail = () => {
     try {
       setIsLoading(true);
       setHasError(false);
+
+
       const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/data/sleep_summary/by-date?date=${yesterday}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${yesterday}`),
         fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/sleep`)
       ]);
 
@@ -86,9 +92,10 @@ const SleepDetail = () => {
       // Today Data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
       if (todayData && goalData) {
-        const minutes = todayData.total_sleep_minutes;
+        const minutes = todayData.total_minutes_in_bed - todayData.awake_minutes;
         const percentage = Math.round((minutes / (goalData.goal * 60)) * 100);
         setSleepHours(Math.floor(minutes / 60));
+        setInBedHours(Math.floor(todayData.total_minutes_in_bed / 60));
         setSleepPercentage(percentage);
       }
 
@@ -96,7 +103,6 @@ const SleepDetail = () => {
       if (weeklyDataArray?.available_sleep_data?.length > 0) {
         const processedSleepData = weeklyDataArray.available_sleep_data.map((item: { date: string; total_sleep_minutes: number }) => {
           const date = new Date(item.date);
-          const fixedDate = new Date(config.FIXED_DATE);
           const options: Intl.DateTimeFormatOptions = { weekday: "short" };
           return {
             day: new Intl.DateTimeFormat("en-US", options).format(date),
@@ -120,7 +126,7 @@ const SleepDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=sleep`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${yesterday}&metric=sleep`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -140,16 +146,16 @@ const SleepDetail = () => {
 
   if (isLoading || hasError) {
     return (
-        <LoadingErrorView
-            isLoading={isLoading}
-            hasError={hasError}
-            onRetry={fetchData}
-            loadingText="Loading your sleep data..."
-            errorText="Failed to load your sleep data. Do you want to try again?"
-            headerTitle="Targets & Progress"
-        />
+      <LoadingErrorView
+        isLoading={isLoading}
+        hasError={hasError}
+        onRetry={fetchData}
+        loadingText="Loading your sleep data..."
+        errorText="Failed to load your sleep data. Do you want to try again?"
+        headerTitle="Targets & Progress"
+      />
     );
-}
+  }
 
 
   return (
@@ -161,7 +167,7 @@ const SleepDetail = () => {
 
       <View className="flex-row justify-between mb-4 mt-4">
         <IconTextBox icon={icons.sleepTime} topText={sleepHours.toLocaleString()} bottomText="Hours asleep" />
-        <IconTextBox icon={icons.sleeping} topText={"10"} bottomText="Hours in bed" />
+        <IconTextBox icon={icons.sleeping} topText={inBedHours.toLocaleString()} bottomText="Hours in bed" />
       </View>
 
       <View>
@@ -170,7 +176,7 @@ const SleepDetail = () => {
           <View className="w-full h-8  bg-gray-200 rounded-full relative">
             <View
               className={`absolute  h-8 ${getProgressColor(sleepPercentage)} flex items-center justify-center rounded-full`}
-              style={{ width: `${sleepPercentage}%` }}
+              style={{ width: `${Math.min(sleepPercentage, 100)}%` }}
             >
               <Text className="text-white font-semibold">
                 {`${sleepPercentage}%`}

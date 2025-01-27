@@ -1,21 +1,27 @@
 import { icons } from "@/constants";
-import { router, useRouter, useSegments } from "expo-router";
+import { RelativePathString, router, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
 const CustomHeader = ({ title, showBackButton = true, rightButton = null }: { title: string; showBackButton: boolean, rightButton?: React.ReactNode; }) => {
     const segments = useSegments();
 
+
+
     const handleBackPress = () => {
-        const isOnTabScreen = segments.length === 1; // Top-level tabs have 1 segment
-      
-        if (!isOnTabScreen) {
-          // Go back in the stack if on a nested screen
-          router.back();
+        // console.log(segments);
+        if (segments.length > 1) {
+            // Construct parent segment
+            const parentSegment = `/${segments.slice(0, -1).join("/")}` as const;
+
+            // Push the segment to the router
+            router.push(parentSegment as RelativePathString);
         } else {
-          console.log("Already on a main tab screen, no further back navigation.");
+            console.log("No previous screen to navigate back to.");
         }
-      };
+    };
+
+
 
     return (
         <View className="flex-row w-full items-center justify-between p-4 bg-white border-b border-gray-200">

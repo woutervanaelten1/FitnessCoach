@@ -1,20 +1,24 @@
 import { Tabs, usePathname } from "expo-router";
-import { View, Image, ImageSourcePropType, SafeAreaView } from "react-native";
+import { View, Image, ImageSourcePropType, SafeAreaView, Text } from "react-native";
 import { icons } from "@/constants";
 
-const TabIcon = ({ source, focused }: { source: ImageSourcePropType, focused: boolean }) => (
-    <View className="flex items-center justify-center">
+const TabIcon = ({ source, focused, title }: { source: ImageSourcePropType, focused: boolean, title: string }) => (
+    <View style={{ alignItems: "center", justifyContent: "center" }}>
         <Image
             source={source}
             tintColor={focused ? "#307FE2" : "#D3D3D3"}
             resizeMode="contain"
-            className="w-12 h-12"
+            className="w-9 h-9 mt-3"
         />
+        {/* <Text style={{ color: focused ? "#307FE2" : "#D3D3D3", fontSize: 12, textAlign: "center" }}>
+            {title}
+        </Text> */}
     </View>
 );
 
 const Layout = () => {
     const pathname = usePathname();
+    
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
@@ -23,14 +27,19 @@ const Layout = () => {
                     screenOptions={{
                         tabBarShowLabel: false,
                         tabBarStyle: {
-                            backgroundColor: "white",
-                            overflow: "hidden",
-                            height: 78,
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            flexDirection: "row",
+                            // backgroundColor: "white",
+                            // overflow: "hidden",
+                            // height: 78,
+                            // display: "flex",
+                            // justifyContent: "space-between",
+                            // alignItems: "center",
+                            // flexDirection: "row",
                             // marginBottom: -25,
+                            flexDirection: "row",
+                            height: 78,
+                            backgroundColor: "white",
+                            justifyContent: "space-around",
+                            alignItems: "center",
                         },
                     }}>
                     <Tabs.Screen
@@ -39,7 +48,7 @@ const Layout = () => {
                             title: "Home",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => (
-                                <TabIcon focused={focused} source={icons.home} />
+                                <TabIcon focused={focused} source={icons.home} title="Home"/>
                             ),
                         }}
                     />
@@ -50,7 +59,7 @@ const Layout = () => {
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/dashboard");
-                                return <TabIcon focused={isActive} source={icons.graph} />;
+                                return <TabIcon focused={isActive} source={icons.graph} title="Dashboard"/>;
                             },
                         }}
                     />
@@ -61,7 +70,7 @@ const Layout = () => {
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/chat");
-                                return <TabIcon focused={isActive} source={icons.chat} />;
+                                return <TabIcon focused={isActive} source={icons.chat} title="Coach"/>;
                             },
                         }}
                     />
@@ -72,7 +81,7 @@ const Layout = () => {
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/progress");
-                                return <TabIcon focused={isActive} source={icons.target} />;
+                                return <TabIcon focused={isActive} source={icons.target} title="Progress" />;
                             },
                         }}
                     />
@@ -83,7 +92,7 @@ const Layout = () => {
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/profile");
-                                return <TabIcon focused={isActive} source={icons.profile} />;
+                                return <TabIcon focused={isActive} source={icons.profile} title="Profile"/>;
                             },
                         }}
                     />

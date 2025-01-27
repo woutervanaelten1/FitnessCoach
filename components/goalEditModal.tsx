@@ -18,7 +18,7 @@ const GoalEditModal = ({
     onSave: (newGoal: number) => void;
 }) => {
     const [inputValue, setInputValue] = useState<string>(goal.toString());
-    const [goalSuggestion, setGoalSuggestion] = useState<{ new_goal: string; justification: string } | null>(null);
+    const [goalSuggestion, setGoalSuggestion] = useState<{ goal: string; justification: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
 
@@ -32,8 +32,9 @@ const GoalEditModal = ({
             if (!response.ok) throw new Error("Failed to fetch data");
 
             const data = await response.json();
+            console.log(data);
             if (data?.suggestion) {
-                setGoalSuggestion({ new_goal: data.suggestion.new_goal, justification: data.suggestion.justification });
+                setGoalSuggestion({ goal: data.suggestion.goal, justification: data.suggestion.justification });
             } else {
                 setFetchError(true);
             }
@@ -85,7 +86,7 @@ const GoalEditModal = ({
                             <View className="pr-5">
                                 <View className="flex-row items-center">
                                     <Image source={icons.target} tintColor="#307FE2" resizeMode="contain" className="w-5 h-5 mr-2" />
-                                    <Text className="text-lg font-bold">New Goal: {goalSuggestion.new_goal}</Text>
+                                    <Text className="text-lg font-bold">New Goal: {goalSuggestion.goal}</Text>
                                 </View>
                                 <View className="flex-row items-start mb-2">
                                     <Image source={icons.question} tintColor="#307FE2" resizeMode="contain" className="w-5 h-5 mr-2 mt-1" />

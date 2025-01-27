@@ -58,7 +58,7 @@ const ConversationDetailsScreen = () => {
                             message={message.message}
                             maxWidth={90}
                             isUser={message.role === "user"}
-                           
+
                         />
                     ))
                 ) : (
