@@ -34,7 +34,7 @@ const Chat = () => {
         const placeholderMessage = { id: Date.now().toString(), text: "Sending...", isUser: true };
         setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
         setTimeout(() => {
-            setMessages((prevMessages) => 
+            setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                     msg.id === placeholderMessage.id
                         ? { ...msg, text: messageToSend } // Replace placeholder with actual message
@@ -155,7 +155,13 @@ const Chat = () => {
             >
                 <ScrollView
                     ref={scrollViewRef}
-                    contentContainerStyle={{ paddingHorizontal: 10 }}
+                    contentContainerStyle={{
+                        paddingHorizontal: 10,
+                        flexGrow: 1,
+                        // Add these two props:
+                        justifyContent: 'flex-end',
+                        minHeight: '100%'
+                    }}
                     className="flex-1"
                     onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
                 >
@@ -174,11 +180,18 @@ const Chat = () => {
                 <View className="bg-white border-t border-gray-300 p-3">
                     <View className="flex-row items-center">
                         <TextInput
-                            className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-base"
+                            className="flex-1 border border-gray-300 rounded-3xl px-4 py-2 text-base"
                             placeholder="Type your message..."
                             value={input}
                             onChangeText={setInput}
-                            textAlignVertical="center"
+                            textAlignVertical="center" // Center text vertically
+                            multiline={true} // Allow multiple lines
+                            numberOfLines={1} // Start with 1 line
+                            style={{
+                                maxHeight: 80, // Adjust this value based on your font size and line height
+                                paddingTop: Platform.OS === 'android' ? 8 : 10, // Adjust padding for Android
+                                paddingBottom: Platform.OS === 'android' ? 8 : 10, // Adjust padding for Android
+                            }}
                         />
                         <TouchableOpacity
                             className="ml-3 bg-blue-500 rounded-full px-4 py-2 justify-center items-center"

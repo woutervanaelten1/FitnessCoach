@@ -19,23 +19,57 @@ const EarlierChats = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const limit = 5;
+  const [totalConversations, setTotalConversations] = useState<number | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (loadMore = false) => {
     try {
-      setIsLoading(true);
-      setHasError(false);
-      const response = await fetch(`${config.API_BASE_URL}/data/conversation_subjects/${config.USER_ID}`);
+      if (loadMore) {
+        setIsLoadingMore(true); // Show loading indicator for "Load More"
+      } else {
+        setIsLoading(true);
+        setHasError(false);
+      }
+
+      const response = await fetch(
+        `${config.API_BASE_URL}/data/conversation_subjects/${config.USER_ID}?offset=${offset}&limit=${limit}`
+      );
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();
-      setSubjects(data || []);
+      const newSubjects = data.conversations || [];
+      setTotalConversations(data.total); // Update the total count of conversations
+
+      // Append or replace data while avoiding duplicates
+      setSubjects((prev) => {
+        const mergedSubjects = [...prev, ...newSubjects];
+        return Array.from(
+          new Map(mergedSubjects.map((item) => [item.conversation_id, item])).values()
+        );
+      });
+
+      // Update offset
+      setOffset(offset + limit);
     } catch (error) {
       console.error("Error fetching data:", error);
       setHasError(true);
     } finally {
-      setIsLoading(false);
+      if (loadMore) {
+        setIsLoadingMore(false);
+      } else {
+        setIsLoading(false);
+      }
     }
+  };
 
+  // Load more conversations when "Load More" is pressed
+  const loadMoreConversations = () => {
+    if (subjects.length < (totalConversations || 0)) {
+      setOffset((prevOffset) => prevOffset + limit); // Increase offset
+      fetchData(true); // Fetch additional data
+    }
   };
 
   useFocusEffect(
@@ -49,7 +83,10 @@ const EarlierChats = () => {
       <LoadingErrorView
         isLoading={isLoading}
         hasError={hasError}
-        onRetry={fetchData}
+        onRetry={() => {
+          setOffset(0);
+          fetchData();
+        }}
         loadingText="Loading your earlier conversations..."
         errorText="Failed to load your earlier conversations. Do you want to try again?"
         headerTitle="Fitness Dashboard"
@@ -79,15 +116,19 @@ const EarlierChats = () => {
         ) : (
           <Text>No conversations found.</Text>
         )}
+
+        {/* Load More Button */}
+        {subjects.length < (totalConversations || 0) && (
+          <CustomButton
+            title={isLoadingMore ? "Loading..." : "Load More"}
+            onPress={loadMoreConversations}
+            className="w-full bg-blue-500 text-white font-bold py-3 text-lg my-4"
+            disabled={isLoadingMore}
+          />
+        )}
       </View>
 
-      <View className="py-4 bg-white">
-        <CustomButton
-          title="Start a new chat"
-          onPress={() => router.push("/chat/chat")}
-          className="w-full bg-blue-500 text-white font-bold py-3 text-lg"
-        />
-      </View>
+
 
     </ScrollView>
   );
