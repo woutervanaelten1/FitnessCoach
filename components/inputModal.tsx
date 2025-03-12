@@ -24,7 +24,7 @@ const InputModal = ({
     // Set initial input value when modal is opened
     useEffect(() => {
         if (isVisible) {
-            setInputValue(placeholder.toString()); // Initialize with placeholder value
+            setInputValue(placeholder.toString());
         }
     }, [isVisible, placeholder]);
 
@@ -56,7 +56,7 @@ const InputModal = ({
                                 const numericValue = parseFloat(inputValue);
                                 if (!isNaN(numericValue)) {
                                     onSave(numericValue); // Pass the numeric value to onSave
-                                    setInputValue(""); // Clear the input after saving
+                                    setInputValue("");
                                 }
                             }}
                             className="w-1/2 px-4 ml-1"

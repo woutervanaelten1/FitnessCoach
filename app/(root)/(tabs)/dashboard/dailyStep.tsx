@@ -7,6 +7,7 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-nat
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { icons } from "@/constants";
 import LoadingErrorView from "@/components/LoadingErrorView";
+import { useProfile } from "@/app/context/ProfileContext";
 
 const DailyStep = () => {
     const [steps, setSteps] = useState(0);
@@ -16,8 +17,7 @@ const DailyStep = () => {
     const [isDatePickerOpen, setDatePickerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
-
-
+    const { userId } = useProfile();
     const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
     const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -65,9 +65,9 @@ const DailyStep = () => {
             setIsLoading(true);
 
             const [hourlyResponse, todayResponse, goalResponse] = await Promise.all([
-                fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${formattedDate}`),
-                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}`),
-                fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/steps`)
+                fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${formattedDate}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/goals/${userId}/steps`)
             ]);
 
             if (!hourlyResponse.ok || !todayResponse.ok || !goalResponse.ok) {
@@ -96,7 +96,7 @@ const DailyStep = () => {
                 );
                 return {
                     time: hour,
-                    steps: match ? match.steptotal : 0, // Set steps to 0 if no data
+                    steps: match ? match.steptotal : 0,
                 };
             });
 
@@ -117,7 +117,7 @@ const DailyStep = () => {
 
     useEffect(() => {
         fetchStepData(selectedDate);
-    }, [selectedDate]);
+    }, [selectedDate, userId]);
 
     if (isLoading || hasError) {
         return (

@@ -25,10 +25,12 @@ const RecommendationBox = ({ recommendation, metric, onOpenModal }: { recommenda
 
     return (
         <TouchableOpacity onPress={() => onOpenModal({ recommendation, metric, reason: "", benefit: "", based_on: "" })}>
-        <View className="flex-row items-center bg-gray-100 p-3 rounded-lg my-1">
-            <Image source={icon} tintColor="#307FE2" className="w-10 h-10 mr-3" />
-            <Text  className="text-lg flex-1 font-bold text-blue-500 mb-1">{recommendation}</Text>
-        </View>
+            <View className="flex-row items-center bg-gray-100 p-4 rounded-lg my-1">
+                <Image source={icon} tintColor="#307FE2" className="w-10 h-10" />
+                <View className="flex-1 ml-4">
+                    <Text className="text-lg font-bold text-blue-500">{recommendation}</Text>
+                </View>
+            </View>
         </TouchableOpacity>
     )
 }

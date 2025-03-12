@@ -79,7 +79,6 @@ const Index = () => {
         </View>
       )}
 
-      {/* Always show the buttons */}
       <View className="py-4 bg-white">
         <CustomButton
           title="Browse earlier chats..."

@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import ChatBubble from "@/components/ChatBubble";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
@@ -23,18 +24,19 @@ const EarlierChats = () => {
   const [offset, setOffset] = useState(0);
   const limit = 5;
   const [totalConversations, setTotalConversations] = useState<number | null>(null);
+  const { userId } = useProfile();
 
   const fetchData = async (loadMore = false) => {
     try {
       if (loadMore) {
-        setIsLoadingMore(true); // Show loading indicator for "Load More"
+        setIsLoadingMore(true);
       } else {
         setIsLoading(true);
         setHasError(false);
       }
 
       const response = await fetch(
-        `${config.API_BASE_URL}/data/conversation_subjects/${config.USER_ID}?offset=${offset}&limit=${limit}`
+        `${config.API_BASE_URL}/data/conversation_subjects/${userId}?offset=${offset}&limit=${limit}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -75,7 +77,7 @@ const EarlierChats = () => {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [])
+    }, [userId])
   );
 
   if (isLoading || hasError) {
@@ -117,7 +119,6 @@ const EarlierChats = () => {
           <Text>No conversations found.</Text>
         )}
 
-        {/* Load More Button */}
         {subjects.length < (totalConversations || 0) && (
           <CustomButton
             title={isLoadingMore ? "Loading..." : "Load More"}

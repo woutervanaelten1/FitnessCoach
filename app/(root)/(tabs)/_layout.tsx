@@ -18,7 +18,7 @@ const TabIcon = ({ source, focused, title }: { source: ImageSourcePropType, focu
 
 const Layout = () => {
     const pathname = usePathname();
-    
+
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
@@ -46,38 +46,42 @@ const Layout = () => {
                         name="home"
                         options={{
                             title: "Home",
+                            href: "/home",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => (
-                                <TabIcon focused={focused} source={icons.home} title="Home"/>
+                                <TabIcon focused={focused} source={icons.home} title="Home" />
                             ),
                         }}
                     />
                     <Tabs.Screen
-                        name="dashboard/index"
+                        name="dashboard"
                         options={{
                             title: "Dashboard",
+                            href: "/dashboard",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/dashboard");
-                                return <TabIcon focused={isActive} source={icons.graph} title="Dashboard"/>;
+                                return <TabIcon focused={isActive} source={icons.graph} title="Dashboard" />;
                             },
                         }}
                     />
                     <Tabs.Screen
-                        name="chat/index"
+                        name="chat"
                         options={{
                             title: "Coach",
+                            href: "/chat",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/chat");
-                                return <TabIcon focused={isActive} source={icons.chat} title="Coach"/>;
+                                return <TabIcon focused={isActive} source={icons.chat} title="Coach" />;
                             },
                         }}
                     />
                     <Tabs.Screen
-                        name="progress/index"
+                        name="progress"
                         options={{
                             title: "Targets & Progress",
+                            href: "/progress",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/progress");
@@ -89,96 +93,25 @@ const Layout = () => {
                         name="profile"
                         options={{
                             title: "Profile",
+                            href: "/profile",
                             headerShown: false,
                             tabBarIcon: ({ focused }) => {
                                 const isActive = pathname.startsWith("/profile");
-                                return <TabIcon focused={isActive} source={icons.profile} title="Profile"/>;
+                                return <TabIcon focused={isActive} source={icons.profile} title="Profile" />;
                             },
                         }}
                     />
 
                     {/* HIDE THESE ROUTES FROM THE NAVIGATION BAR */}
                     <Tabs.Screen
-                        name="progress/editTargets"
+                        name="_layout_NEW"
                         options={{
                             title: "Edit Targets",
                             headerShown: false,
                             href: null,
                         }}
                     />
-                    <Tabs.Screen
-                        name="chat/earlierChats"
-                        options={{
-                            title: "Edit Targets",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="chat/chat"
-                        options={{
-                            title: "New Chat",
-                            headerShown: false,
-                            tabBarStyle: { display: "none" },
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="chat/conversationDetail/[conversationId]"
-                        options={{
-                            title: "Earlier conversation",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/activeDetail"
-                        options={{
-                            title: "Activity Overview",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/calorieDetail"
-                        options={{
-                            title: "Calories Overview",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/sleepDetail"
-                        options={{
-                            title: "Sleep Overview",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/stepDetail"
-                        options={{
-                            title: "Steps Overview",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/weightDetail"
-                        options={{
-                            title: "Weight Overview",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
-                    <Tabs.Screen
-                        name="dashboard/dailyStep"
-                        options={{
-                            title: "Hourly Steps",
-                            headerShown: false,
-                            href: null,
-                        }}
-                    />
+                    
 
 
                 </Tabs>

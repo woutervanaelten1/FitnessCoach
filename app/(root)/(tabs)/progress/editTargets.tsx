@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomHeader from "@/components/CustomHeader";
 import GoalEditModal from "@/components/goalEditModal";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -20,7 +21,7 @@ const Targets = () => {
   const [goalCalories, setGoalCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
+  const { userId } = useProfile();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<{
     metric: string;
@@ -34,12 +35,10 @@ const Targets = () => {
       setIsLoading(true);
       setHasError(false);
       const [weekResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}`)
+        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/goals/${userId}`)
       ]);
 
-
-      // Check if responses are ok
       if (!weekResponse.ok || !goalResponse.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -88,7 +87,7 @@ const Targets = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [userId]);
 
   const handleSaveNewGoal = async (goalValue: number) => {
     if (selectedGoal) {
@@ -217,7 +216,6 @@ const Targets = () => {
           handleSaveNewGoal(newGoal); // Directly pass the latest input value
           setNewGoalValue(newGoal.toString()); // Optionally update the state
         }}
-      // onChangeValue={setNewGoalValue}
       />
       <Toast />
     </ScrollView>

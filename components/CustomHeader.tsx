@@ -4,24 +4,16 @@ import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
 const CustomHeader = ({ title, showBackButton = true, rightButton = null }: { title: string; showBackButton: boolean, rightButton?: React.ReactNode; }) => {
-    const segments = useSegments();
-
-
+    const router = useRouter();
 
     const handleBackPress = () => {
-        // console.log(segments);
-        if (segments.length > 1) {
-            // Construct parent segment
-            const parentSegment = `/${segments.slice(0, -1).join("/")}` as const;
-
-            // Push the segment to the router
-            router.push(parentSegment as RelativePathString);
+        if (router.canGoBack()) {
+            router.back();
         } else {
-            console.log("No previous screen to navigate back to.");
+            // Fallback to home if no navigation history
+            router.replace('/home');
         }
     };
-
-
 
     return (
         <View className="flex-row w-full items-center justify-between p-4 bg-white border-b border-gray-200">

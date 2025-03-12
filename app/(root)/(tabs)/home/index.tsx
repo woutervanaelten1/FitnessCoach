@@ -2,12 +2,13 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import { images } from "@/constants";
 import { router } from "expo-router";
-import { Image, ScrollView, Text, View, ActivityIndicator } from "react-native";
+import { Image, ScrollView, Text, View, ActivityIndicator, TouchableOpacity } from "react-native";
 import config from "@/config";
 import { useEffect, useState } from "react";
 import React from 'react';
 import RecommendationBox from "@/components/RecommendationBox";
 import RecommendationModal from "@/components/RecommendationModal";
+import { useProfile } from "@/app/context/ProfileContext";
 
 
 const Home = () => {
@@ -22,42 +23,56 @@ const Home = () => {
 
 
   const [currentSteps, setCurrentSteps] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(true);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const goalSteps = 10000;
   const progress = Math.min((currentSteps ?? 0) / goalSteps, 1);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const { userId } = useProfile();
 
-  const fetchData = async () => {
-    // CHANGE CHATS TO CHAT
+
+
+  const fetchStepData = async () => {
     try {
-      const [dailyResponse, recommendationsResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}`)
-      ]);
-
-
-      if (!dailyResponse.ok || !recommendationsResponse.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
+      setHasError(false);
+      setIsLoadingData(true);
+      const dailyResponse = await fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}&user_id=${userId}`);
+      if (!dailyResponse.ok) throw new Error("Failed to fetch step data");
       const dailyData = await dailyResponse.json();
-      const recommendationsData = await recommendationsResponse.json();
-
-      setRecommendations(recommendationsData.recommendations || []);
       setCurrentSteps(dailyData.length > 0 ? dailyData[0].totalsteps : 0);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching step data:", error);
+      setHasError(true);
     } finally {
-      setIsLoading(false);
+      setIsLoadingData(false);
     }
-
   };
 
+  const fetchRecommendations = async () => {
+    try {
+      setFetchError(false);
+      setIsLoadingRecommendation(true);
+      const recommendationsResponse = await fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}`);
+      if (!recommendationsResponse.ok) throw new Error("Failed to fetch recommendations");
+      const recommendationsData = await recommendationsResponse.json();
+      setRecommendations(recommendationsData.recommendations || []);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      setFetchError(true);
+    } finally {
+      setIsLoadingRecommendation(false);
+    }
+  };
+
+
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchStepData();
+    fetchRecommendations();
+  }, [userId]);
 
   const handleOpenModal = (rec: Recommendation) => {
     setSelectedRecommendation(rec);
@@ -71,8 +86,6 @@ const Home = () => {
     router.push(`../(tabs)/chat/chat?question=${encodedQuestion}`);
   };
 
-
-
   return (
     <ScrollView contentContainerStyle={{ alignItems: "center" }} className="w-full  bg-white">
       <CustomHeader title="Home" showBackButton={false} />
@@ -80,9 +93,16 @@ const Home = () => {
       <Image source={images.dumbell} className="z-0 w-full h-[200px]" />
 
       <View className="items-center my-5 w-full align-middle">
-        {isLoading ? (
+        {isLoadingData ? (
           <ActivityIndicator size="large" color="#307FE2" />
-        ) : (
+        ) : hasError ? (
+          <View className="p-4 rounded-lg flex items-center">
+            <Text className="text-blue-500 text-base mb-2 font-bold">Failed to load step data.</Text>
+            <TouchableOpacity onPress={fetchStepData} className="w-1/2 bg-blue-500 rounded-lg p-3 px-5">
+              <Text className="text-lg font-bold text-white">Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : currentSteps ? (
           <>
             <Text className="text-2xl font-bold">{currentSteps.toLocaleString()} Steps</Text>
             <View className="w-4/5 h-2 bg-gray-200 rounded-full mt-2">
@@ -92,29 +112,37 @@ const Home = () => {
               />
             </View>
           </>
+        ) : (
+          <Text className="text-gray-500 text-lg text-center">No step data found.</Text>
         )}
       </View>
 
       <View className="w-11/12">
         <Text className="text-2xl font-bold mb-2">Recommendations</Text>
-        <Text className="text-blue-500 font-semibold text-base mb-4">Touch one of the recommendations for more information</Text>
-
-        {isLoading ? (
+        <Text className="text-blue-500 font-semibold text-base mb-4">
+          Touch one of the recommendations for more information
+        </Text>
+        {isLoadingRecommendation ? (
           <>
             <ActivityIndicator size="large" color="#307FE2" />
-            <Text className="text-base text-gray-500 mt-2">Loading recommendations...</Text>
+            <Text className="text-base text-gray-500 mt-2 text-center">Loading recommendations...</Text>
           </>
+        ) : fetchError ? (
+          <View className="p-4 rounded-lg flex items-center">
+            <Text className="text-blue-500 text-base mb-2 font-bold">Failed to load recommendations.</Text>
+            <CustomButton title="Retry" onPress={fetchRecommendations} className="w-1/2" />
+          </View>
         ) : recommendations.length > 0 ? (
           recommendations.map((rec, index) => (
             <RecommendationBox metric={rec.metric} recommendation={rec.recommendation} onOpenModal={() => handleOpenModal(rec)} key={index} />
           ))
         ) : (
-          <Text className="text-base text-red-500">An error occurred while loading the recommendations.</Text>
+          <Text className="text-gray-500 text-lg">No recommendations found.</Text>
         )}
       </View>
 
 
-      <CustomButton title="Start a new chat!" onPress={() => router.replace("../(tabs)/chat/chat")} className="w-11/12 my-4" />
+      <CustomButton title="Start a new chat!" onPress={() => router.push("../(tabs)/chat/chat")} className="w-11/12 my-4" />
 
       <RecommendationModal
         isVisible={modalVisible}

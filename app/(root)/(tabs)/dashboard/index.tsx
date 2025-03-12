@@ -8,6 +8,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, VictoryArea, VictoryScatter } from "victory-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingErrorView from "@/components/LoadingErrorView";
+import { useProfile } from "@/app/context/ProfileContext";
 
 const Dashboard = () => {
   const [steps, setSteps] = useState(0);
@@ -23,8 +24,11 @@ const Dashboard = () => {
   const [hasError, setHasError] = useState(false);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
   const fixedDate = new Date(config.FIXED_DATE);
-  fixedDate.setDate(fixedDate.getDate() - 1); // Subtract 1 day
-  const yesterday = fixedDate.toISOString().split('T')[0];
+  const yesterday = new Date(fixedDate); // Create a new Date instance
+  yesterday.setDate(yesterday.getDate() - 1); // Subtract 1 day
+  const formattedYesterday = yesterday.toISOString().split('T')[0];
+  const { userId } = useProfile();
+
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -101,10 +105,10 @@ const Dashboard = () => {
       setIsLoading(true);
       setHasError(false);
       const [todayResponse, sleepResponse, heartRateResponse, weightResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${yesterday}`),
-        fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${formattedYesterday}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
       ]);
 
       if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse.ok || !weightResponse.ok) {
@@ -206,7 +210,7 @@ const Dashboard = () => {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [])
+    }, [userId])
   );
 
 

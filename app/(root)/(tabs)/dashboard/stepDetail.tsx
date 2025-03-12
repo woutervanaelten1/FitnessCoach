@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import DetailView from "@/components/DetailComponent";
@@ -21,8 +22,8 @@ const StepDetail = () => {
     const [detailLoading, setDetailLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
-
-
+    const { userId } = useProfile();
+    
     const customThemeBarChart = {
         ...VictoryTheme.material,
         bar: {
@@ -62,9 +63,9 @@ const StepDetail = () => {
             setIsLoading(true);
             setHasError(false);
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-                fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-                fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/steps`)
+                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/goals/${userId}/steps`)
             ]);
 
             if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
@@ -135,7 +136,7 @@ const StepDetail = () => {
     useEffect(() => {
         fetchData();
         fetchDetail();
-    }, []);
+    }, [userId]);
 
 
     if (isLoading || hasError) {

@@ -20,16 +20,19 @@ const Chat = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { question } = useLocalSearchParams();
     const [hasSentInitialQuestion, setHasSentInitialQuestion] = useState(false);
+    const [hasError, setHasError] = useState(false);
+    const [lastMessage, setLastMessage] = useState<string | null>(null);
+
+
 
     const handleSendMessage = useCallback(async (messageToSend: string) => {
         if (!messageToSend) return; // Prevent sending empty messages
 
-        setInput(''); // Clear input field
+        setInput('');
         setIsLoading(false);
+        setHasError(false);
+        setLastMessage(messageToSend);
 
-        // Add the user's message to the messages array
-        const userMessage = { id: Date.now().toString(), text: messageToSend, isUser: true };
-        // setMessages((prevMessages) => [...prevMessages, userMessage]);
         // Show a temporary placeholder for the user's message
         const placeholderMessage = { id: Date.now().toString(), text: "Sending...", isUser: true };
         setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
@@ -41,12 +44,11 @@ const Chat = () => {
                         : msg
                 )
             );
-        }, 1000); // Delay duration
+        }, 1000);
 
         setIsLoading(true);
 
         try {
-            // Call FastAPI endpoint using fetch
             const response = await fetch(`${config.API_BASE_URL}/chat/chat`, {
                 method: "POST",
                 headers: {
@@ -83,27 +85,20 @@ const Chat = () => {
             scrollViewRef.current?.scrollToEnd({ animated: true });
         } catch (error) {
             console.error("Error fetching chatbot response:", error);
-            const errorMessage = {
-                id: Date.now().toString(),
-                text: "Sorry, something went wrong. Please try again later.",
-                isUser: false,
-            };
-            setMessages((prevMessages) => [...prevMessages, errorMessage]);
+            setHasError(true);
         } finally {
             setIsLoading(false);
         }
     }, [conversationId]);
 
-    // useEffect(() => {
-    //     const sendPreFilledQuestion = async () => {
-    //         if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
-    //             setHasSentInitialQuestion(true); 
-    //             await handleSendMessage(decodeURIComponent(question));
-    //         }
-    //     };
+    const handleRetry = () => {
+        setHasError(false);
+        setIsLoading(false);
 
-    //     // sendPreFilledQuestion();
-    // }, [question, hasSentInitialQuestion, handleSendMessage]);
+        if (lastMessage) {
+            handleSendMessage(lastMessage);
+        }
+    };
 
     useFocusEffect(
         useCallback(() => {
@@ -127,9 +122,6 @@ const Chat = () => {
 
         }, [question])
     );
-
-
-
 
     return (
         <View className="flex-1 bg-white">
@@ -158,7 +150,6 @@ const Chat = () => {
                     contentContainerStyle={{
                         paddingHorizontal: 10,
                         flexGrow: 1,
-                        // Add these two props:
                         justifyContent: 'flex-end',
                         minHeight: '100%'
                     }}
@@ -175,6 +166,22 @@ const Chat = () => {
                             <Text className="text-base text-gray-500 mt-2">Loading response...</Text>
                         </View>
                     )}
+
+                    {hasError && (
+                        <View className="flex-row justify-start my-2"
+                            style={{
+                                maxWidth: `${90}%`,
+                                flexShrink: 1,
+                            }}>
+                            <View className="bg-gray-200 p-3 rounded-lg items-center">
+                                <Text className="text-base">Failed to send message. Do you want to try again?</Text>
+                                <TouchableOpacity onPress={handleRetry} className="mt-2 bg-blue-500 px-4 py-2 rounded-lg w-1/2">
+                                    <Text className="text-white font-bold text-center text-base">Retry</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+
                 </ScrollView>
 
                 <View className="bg-white border-t border-gray-300 p-3">
@@ -184,13 +191,13 @@ const Chat = () => {
                             placeholder="Type your message..."
                             value={input}
                             onChangeText={setInput}
-                            textAlignVertical="center" // Center text vertically
-                            multiline={true} // Allow multiple lines
-                            numberOfLines={1} // Start with 1 line
+                            textAlignVertical="center"
+                            multiline={true}
+                            numberOfLines={1}
                             style={{
-                                maxHeight: 80, // Adjust this value based on your font size and line height
-                                paddingTop: Platform.OS === 'android' ? 8 : 10, // Adjust padding for Android
-                                paddingBottom: Platform.OS === 'android' ? 8 : 10, // Adjust padding for Android
+                                maxHeight: 80, 
+                                paddingTop: Platform.OS === 'android' ? 8 : 10, 
+                                paddingBottom: Platform.OS === 'android' ? 8 : 10, 
                             }}
                         />
                         <TouchableOpacity

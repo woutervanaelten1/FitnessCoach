@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import DetailView from "@/components/DetailComponent";
@@ -22,6 +23,7 @@ const ActivityDetail = () => {
   const [detailLoading, setDetailLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+  const { userId } = useProfile();
 
   const getHoursAndMinutes = (totalMinutes: number) => {
     setHours(Math.floor(totalMinutes / 60));
@@ -31,12 +33,13 @@ const ActivityDetail = () => {
 
 
   const fetchData = async () => {
+    
     try {
       setIsLoading(true);
       setHasError(false);
       const [activityResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/active_minutes`)
+        fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/goals/${userId}/active_minutes`)
       ]);
 
       if (!activityResponse.ok || !goalResponse.ok) {
@@ -88,7 +91,7 @@ const ActivityDetail = () => {
   useEffect(() => {
     fetchData();
     fetchDetail();
-  }, []);
+  }, [userId]);
 
   if (isLoading || hasError) {
     return (

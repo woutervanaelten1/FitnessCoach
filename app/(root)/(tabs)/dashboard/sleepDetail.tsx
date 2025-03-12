@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import DetailView from "@/components/DetailComponent";
@@ -21,8 +22,11 @@ const SleepDetail = () => {
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
   const fixedDate = new Date(config.FIXED_DATE);
-  fixedDate.setDate(fixedDate.getDate() - 1); // Subtract 1 day
-  const yesterday = fixedDate.toISOString().split('T')[0];
+  const yesterday = new Date(fixedDate); // Create a new Date instance
+  yesterday.setDate(yesterday.getDate() - 1); // Subtract 1 day
+  const formattedYesterday = yesterday.toISOString().split('T')[0];
+  const { userId } = useProfile();
+  
 
   const customThemeBarChart = {
     ...VictoryTheme.material,
@@ -71,9 +75,9 @@ const SleepDetail = () => {
 
 
       const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/sleep_summary/by-date?date=${yesterday}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${yesterday}`),
-        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/sleep`)
+        fetch(`${config.API_BASE_URL}/data/sleep_summary/by-date?date=${formattedYesterday}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${formattedYesterday}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/goals/${userId}/sleep`)
       ]);
 
       if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
@@ -126,7 +130,7 @@ const SleepDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${yesterday}&metric=sleep`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedYesterday}&metric=sleep`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -142,7 +146,7 @@ const SleepDetail = () => {
   useEffect(() => {
     fetchData();
     fetchDetail();
-  }, []);
+  }, [userId]);
 
   if (isLoading || hasError) {
     return (

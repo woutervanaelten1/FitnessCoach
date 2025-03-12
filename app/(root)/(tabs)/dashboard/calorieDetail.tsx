@@ -9,6 +9,7 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-nat
 import CustomButton from "@/components/CustomButton";
 import DetailView from "@/components/DetailComponent";
 import LoadingErrorView from "@/components/LoadingErrorView";
+import { useProfile } from "@/app/context/ProfileContext";
 
 const CalorieDetail = () => {
   const [calories, setCalories] = useState(0);
@@ -21,6 +22,8 @@ const CalorieDetail = () => {
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
+  const { userId } = useProfile();
+  
 
 
   const customThemeBarChart = {
@@ -66,9 +69,9 @@ const CalorieDetail = () => {
       setIsLoading(true);
       setHasError(false);
       const [todayResponse, hourlyResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/calories`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/goals/${userId}/calories`),
       ]);
 
       if (!todayResponse.ok || !hourlyResponse.ok || !goalResponse.ok) {

@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -22,24 +23,22 @@ const Targets = () => {
   const [goalCalories, setGoalCalories] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
+  const { userId } = useProfile();
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       setHasError(false);
       const [todayResponse, weekResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}`),
-        fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}`)
+        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/goals/${userId}`)
       ]);
 
-      // Check if responses are ok
       if (!todayResponse.ok || !weekResponse.ok || !goalResponse.ok) {
         throw new Error("Failed to fetch data");
       }
 
-      // Parse responses
       const todayDataArray = await todayResponse.json();
       const weeklyDataArray = await weekResponse.json();
       const goalDataArray = await goalResponse.json();
@@ -97,7 +96,7 @@ const Targets = () => {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [])
+    }, [userId])
   );
 
   if (isLoading || hasError) {

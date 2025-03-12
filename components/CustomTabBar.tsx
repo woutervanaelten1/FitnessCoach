@@ -12,7 +12,7 @@ const tabs: { name: "home" | "dashboard" | "chat" | "progress" | "profile"; icon
 ];
 
 const CustomTabBar = () => {
-  const segments = useSegments() as string[]; // Use hook at the top level
+  const segments = useSegments() as string[]; 
   const router = useRouter();
 
   return (
@@ -40,11 +40,6 @@ const CustomTabBar = () => {
               tintColor={isActive ? "#307FE2" : "#D3D3D3"}
               resizeMode="contain"
               className="w-9 h-9"
-            //   style={{
-            //     width: 24,
-            //     height: 24,
-            //     tintColor: isActive ? "#307FE2" : "#D3D3D3",
-            //   }}
             />
             <Text style={{ color: isActive ? "#307FE2" : "#D3D3D3" }}>{tab.label}</Text>
           </TouchableOpacity>

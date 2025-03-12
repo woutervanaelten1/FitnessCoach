@@ -1,3 +1,4 @@
+import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import IconTextBox from "@/components/IconTextBox";
@@ -20,6 +21,7 @@ const StepDetail = () => {
     const [hasError, setHasError] = useState(false);
     const [isGoalEditModalVisible, setIsGoalEditModalVisible] = useState(false);
     const [isInputModalVisible, setIsInputModalVisible] = useState(false);
+    const { userId } = useProfile();
 
     const customThemeLineChart = {
         ...VictoryTheme.material,
@@ -64,9 +66,9 @@ const StepDetail = () => {
             setIsLoading(true);
             setHasError(false);
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}`),
-                fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}`),
-                fetch(`${config.API_BASE_URL}/data/goals/${config.USER_ID}/weight`)
+                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/goals/${userId}/weight`)
             ]);
 
             if (!todayResponse.ok || !weeklyResponse.ok || !goalResponse.ok) {
@@ -103,8 +105,8 @@ const StepDetail = () => {
                     }
                 );
                 const weights = processedWeight.map((d: { day: string; weight: number }) => d.weight);
-                setMinWeight(Math.min(...weights) - 0.5); // Add padding to min
-                setMaxWeight(Math.max(...weights) + 0.5); // Add padding to max
+                setMinWeight(Math.min(...weights) - 0.5);
+                setMaxWeight(Math.max(...weights) + 0.5);
                 setWeightData(processedWeight);
             }
 
@@ -119,7 +121,7 @@ const StepDetail = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [userId]);
 
     if (isLoading || hasError) {
         return (
@@ -136,7 +138,7 @@ const StepDetail = () => {
 
     const handleSaveNewGoal = async (inputTarget: number) => {
         try {
-            // Post for new goal
+            // POST for new goal
             const response = await fetch(
                 `${config.API_BASE_URL}/data/goals/${config.USER_ID}/weight?goal_value=${Number(inputTarget)}`,
                 {
@@ -173,7 +175,7 @@ const StepDetail = () => {
 
     const handleLogWeight = async (inputWeight: number) => {
         try {
-            const heightInMeters = 1.60; // Example height
+            const heightInMeters = config.PROFILES[userId as keyof typeof config.PROFILES]?.height
             const weight = Number(inputWeight);
             const bmi = (weight / (heightInMeters ** 2)).toFixed(2);
             const currentTimestamp = new Date();
@@ -194,7 +196,7 @@ const StepDetail = () => {
                     "accept": "application/json",
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(logEntry) // Include only necessary data in the body
+                body: JSON.stringify(logEntry)
             });
 
             if (!response.ok) {
