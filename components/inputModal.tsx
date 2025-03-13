@@ -2,6 +2,18 @@ import { View, Text, TextInput, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import CustomButton from "./CustomButton";
 
+/**
+ * InputModal Component
+ * A modal that allows users to input a numeric value and save it (new weight, ).
+ *
+ * @param {boolean} isVisible - Controls the modal's visibility.
+ * @param {string} title - The title displayed at the top of the modal.
+ * @param {string} subtitle - A short description or instruction for the input field.
+ * @param {number} placeholder - The default numeric value shown when the modal opens.
+ * @param {string} inputPlaceholder - A hint for the user input field.
+ * @param {() => void} onClose - Function to close the modal without saving.
+ * @param {(inputValue: number) => void} onSave - Function triggered when saving the input value.
+ */
 const InputModal = ({
     isVisible,
     title,
@@ -32,9 +44,11 @@ const InputModal = ({
         <Modal visible={isVisible} animationType="fade" transparent>
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
                 <View className="bg-white p-6 rounded-lg w-11/12">
+                    {/* Title */}
                     <Text className="text-xl font-bold text-center mb-4">{title}</Text>
+                    {/* Subtitle */}
                     <Text className="text-blue-500 font-bold text-center mb-4">{subtitle}</Text>
-
+                    {/* Input Field */}
                     <TextInput
                         value={inputValue}
                         onChangeText={(text) => setInputValue(text)}
@@ -42,7 +56,7 @@ const InputModal = ({
                         className="border border-gray-300 rounded-md p-3 text-center text-lg"
                         placeholder={inputPlaceholder}
                     />
-
+                    {/* Buttons Section */}
                     <View className="flex-row justify-between mt-4">
                         {/* Cancel Button */}
                         <CustomButton
@@ -50,6 +64,7 @@ const InputModal = ({
                             onPress={onClose}
                             className="w-1/2 bg-red-500"
                         />
+                        {/* Save Button */}
                         <CustomButton
                             title="Save"
                             onPress={() => {

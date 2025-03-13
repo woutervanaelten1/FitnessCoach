@@ -10,6 +10,12 @@ import { icons } from "@/constants";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 
+/**
+ * The ActivityDetail screen provides an overview of the user's activity levels,
+ * including active minutes, sedentary time, progress towards their goal, and additional details.
+ *
+ * @returns {JSX.Element} The ActivityDetail screen component.
+ */
 const ActivityDetail = () => {
   const [lightlyActive, setLightlyActive] = useState(0);
   const [fairlyActive, setFairlyActive] = useState(0);
@@ -25,15 +31,22 @@ const ActivityDetail = () => {
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
   const { userId } = useProfile();
 
+  /**
+   * Converts total sedentary minutes into hours and minutes.
+   *
+   * @param {number} totalMinutes - Total sedentary minutes.
+   * @returns {void}
+   */
   const getHoursAndMinutes = (totalMinutes: number) => {
     setHours(Math.floor(totalMinutes / 60));
     setMinutes(totalMinutes % 60);
     return { hours, minutes };
   };
 
-
+  /**
+   * Fetches activity data and user's active minutes goal from the API.
+   */
   const fetchData = async () => {
-    
     try {
       setIsLoading(true);
       setHasError(false);
@@ -72,6 +85,10 @@ const ActivityDetail = () => {
 
   };
 
+  /**
+   * Fetches detailed activity insights from the API.
+   * This can be a question, insight or adivce for the user
+   */
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
@@ -119,14 +136,26 @@ const ActivityDetail = () => {
         <IconBoxMultiIcon amount={3} icon={icons.bolt} bottomText={highlyActive.toLocaleString()} topText="Very active minutes" />
       </View>
 
+      {/* Progress towards goal */}
       <View className="mt-4">
-        <Text className="text-black text-lg font-bold">
-          You're{" "}
-          <Text className="text-blue-500">{(activityGoal - highlyActive).toLocaleString()} very active minutes</Text> away from your goal!
-        </Text>
+        {highlyActive >= activityGoal ? (
+          <Text className="text-black text-lg font-bold">
+            <Text className="text-blue-500">Goal reached!</Text> You've completed{" "}
+            <Text className="text-blue-500">{highlyActive.toLocaleString()} very active minutes</Text>. Keep up the great work!
+          </Text>
+        ) : (
+          <Text className="text-black text-lg font-bold">
+            You're{" "}
+            <Text className="text-blue-500">
+              {(activityGoal - highlyActive).toLocaleString()} very active minutes
+            </Text>{" "}
+            away from your goal!
+          </Text>
+        )}
         <ProgressBar value={highlyActive} target={activityGoal} />
       </View>
 
+      {/* Sedentary Time */}
       <View className="mt-6">
         <Text className="text-lg font-bold">Sedentary time</Text>
         <View className="items-center my-2">
@@ -145,6 +174,7 @@ const ActivityDetail = () => {
         </View>
       </View>
 
+      {/* Additional Insights (question, advice or insight)*/}
       <View className="mt-2">
         {detailLoading ? (
           <View className="items-center mt-5">

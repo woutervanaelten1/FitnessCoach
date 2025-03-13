@@ -6,12 +6,22 @@ import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+/**
+ * Represents a chat message.
+ */
+type Message = {
+    id: string;
+    text: string;
+    isUser: boolean;
+};
+
+/**
+ * Chat screen where users can send messages and receive responses from the AI.
+ * Users can also start a new chat or retry failed messages.
+ *
+ * @returns {JSX.Element} The chat screen component.
+ */
 const Chat = () => {
-    type Message = {
-        id: string;
-        text: string;
-        isUser: boolean;
-    };
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -23,8 +33,11 @@ const Chat = () => {
     const [hasError, setHasError] = useState(false);
     const [lastMessage, setLastMessage] = useState<string | null>(null);
 
-
-
+    /**
+     * Sends a user message to the backend and updates the chat UI.
+     *
+     * @param {string} messageToSend - The message to send.
+     */
     const handleSendMessage = useCallback(async (messageToSend: string) => {
         if (!messageToSend) return; // Prevent sending empty messages
 
@@ -73,7 +86,7 @@ const Chat = () => {
                 setConversationId(data.conversation_id);
             }
 
-            // Add chatbot's response to the messages array
+            // Display chatbot's response
             const botMessage = {
                 id: Date.now().toString(),
                 text: data.response,
@@ -91,6 +104,9 @@ const Chat = () => {
         }
     }, [conversationId]);
 
+    /**
+     * Retries sending the last message if an error occurred.
+     */
     const handleRetry = () => {
         setHasError(false);
         setIsLoading(false);
@@ -107,19 +123,14 @@ const Chat = () => {
             setConversationId(null);
             setHasSentInitialQuestion(false);
 
-            // Define a local function to send the pre-filled question
-            // If not working ==> Remove the !hasSentInitialQuestion
+            /// Automatically send a pre-filled question if available
             const sendPreFilledQuestion = async () => {
                 if (typeof question === "string" && question.trim()) {
-                    // if (typeof question === "string" && question.trim() && !hasSentInitialQuestion) {
-                    // setHasSentInitialQuestion(true); // Mark as sent
                     await handleSendMessage(decodeURIComponent(question));
                 }
             };
 
-            // Send pre-filled question after resetting the state
             sendPreFilledQuestion();
-
         }, [question])
     );
 
@@ -195,9 +206,9 @@ const Chat = () => {
                             multiline={true}
                             numberOfLines={1}
                             style={{
-                                maxHeight: 80, 
-                                paddingTop: Platform.OS === 'android' ? 8 : 10, 
-                                paddingBottom: Platform.OS === 'android' ? 8 : 10, 
+                                maxHeight: 80,
+                                paddingTop: Platform.OS === 'android' ? 8 : 10,
+                                paddingBottom: Platform.OS === 'android' ? 8 : 10,
                             }}
                         />
                         <TouchableOpacity

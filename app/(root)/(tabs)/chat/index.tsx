@@ -8,14 +8,29 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import LoadingErrorView from "@/components/LoadingErrorView";
 
+/**
+* Represents a suggested chat question.
+*/
+interface Question {
+  question: string;
+}
+
+/**
+ * The main chat index screen displaying suggested questions
+ * and navigation options for chat-related screens.
+ * Like starting a new chat or browsing earlier conversations.
+ *
+ * @returns {JSX.Element} The chat index screen component.
+ */
 const Index = () => {
-  interface Question {
-    question: string;
-  }
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
 
+  /**
+   * Fetches suggested questions from the backend API.
+   * Handles loading and error states.
+   */
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -79,6 +94,7 @@ const Index = () => {
         </View>
       )}
 
+      {/* Navigation Buttons */}
       <View className="py-4 bg-white">
         <CustomButton
           title="Browse earlier chats..."

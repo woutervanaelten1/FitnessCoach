@@ -1,18 +1,34 @@
-import { TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Markdown from "react-native-markdown-display";
+import React, { memo } from "react";
 
-const ChatBubble = ({ message, isUser, maxWidth, onPress }: { message: string, isUser: boolean, maxWidth: number, onPress?: () => void; }) => {
+// Define prop types
+type ChatBubbleProps = {
+  message: string;
+  isUser: boolean;
+  maxWidth: number;
+  onPress?: () => void;
+};
+
+/**
+ * ChatBubble component to display user and chatbot messages with Markdown support.
+ * 
+ * @param {string} message - The text content of the chat bubble.
+ * @param {boolean} isUser - Determines if the message is from the user or bot.
+ * @param {number} maxWidth - Maximum width of the chat bubble.
+ * @param {Function} [onPress] - Optional function to handle press events.
+ */
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, maxWidth, onPress }) => {
   const BubbleComponent = onPress ? TouchableOpacity : View;
 
   return (
     <BubbleComponent
       onPress={onPress}
-      style={{
-        maxWidth: `${maxWidth}%`,
-        flexShrink: 1,
-      }}
-      className={`my-2 p-3 rounded-lg ${isUser ? 'bg-blue-500 self-end' : 'bg-gray-200 self-start'
-        } min-h-[40px]`}
+      style={[
+        styles.bubble,
+        isUser ? styles.userBubble : styles.botBubble,
+        { maxWidth: `${maxWidth}%` },
+      ]}
     >
       <View>
         <Markdown
@@ -64,4 +80,23 @@ const ChatBubble = ({ message, isUser, maxWidth, onPress }: { message: string, i
   );
 };
 
-export default ChatBubble;
+// Define styles using StyleSheet for better performance
+const styles = StyleSheet.create({
+  bubble: {
+    flexShrink: 1,
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 5,
+    minHeight: 40,
+  },
+  userBubble: {
+    backgroundColor: "#307FE2",
+    alignSelf: "flex-end",
+  },
+  botBubble: {
+    backgroundColor: "#E5E7EB",
+    alignSelf: "flex-start",
+  },
+});
+
+export default memo(ChatBubble);

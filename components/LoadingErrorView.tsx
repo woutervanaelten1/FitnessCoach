@@ -3,21 +3,33 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import CustomHeader from './CustomHeader';
 import CustomButton from './CustomButton';
 
-const LoadingErrorView = ({ 
-  isLoading, 
-  hasError, 
-  onRetry, 
-  loadingText = "Loading...", 
-  errorText = "Failed to load. Do you want to try again?", 
-  headerTitle = "Fitness Coach" 
-} : {
-    isLoading: boolean,
-    hasError: boolean, 
-    onRetry: () => void , 
-    loadingText: string, 
-    errorText: string, 
-    headerTitle: string
+/**
+ * LoadingErrorView Component
+ * A reusable component to handle loading and error states in the app.
+ * 
+ * @param {boolean} isLoading - Determines if data is still loading.
+ * @param {boolean} hasError - Indicates if an error occurred during data fetching.
+ * @param {() => void} onRetry - Function to retry loading the data.
+ * @param {string} loadingText - Customizable text displayed while loading.
+ * @param {string} errorText - Customizable error message when data fails to load.
+ * @param {string} headerTitle - Title displayed in the CustomHeader.
+ */
+const LoadingErrorView = ({
+  isLoading,
+  hasError,
+  onRetry,
+  loadingText = "Loading...",
+  errorText = "Failed to load. Do you want to try again?",
+  headerTitle = "Fitness Coach"
+}: {
+  isLoading: boolean,
+  hasError: boolean,
+  onRetry: () => void,
+  loadingText: string,
+  errorText: string,
+  headerTitle: string
 }) => {
+  // Show loading state
   if (isLoading) {
     return (
       <View className="flex-1 bg-white">
@@ -30,6 +42,7 @@ const LoadingErrorView = ({
     );
   }
 
+  // Show error state with retry button
   if (hasError) {
     return (
       <View className="flex-1 bg-white">
@@ -42,6 +55,7 @@ const LoadingErrorView = ({
     );
   }
 
+  // Return nothing if no error and not loading
   return null;
 };
 

@@ -10,24 +10,42 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
+/**
+ * Represents the structure of weekly sleep data.
+ */
+type SleepEntry = {
+  day: string;
+  hours: number;
+  isFixedDate?: boolean;
+};
+
+/**
+ * The SleepDetail screen provides an overview of the user's sleep tracking data,
+ * including total sleep hours, time in bed, and weekly sleep patterns.
+ *
+ * @returns {JSX.Element} The SleepDetail screen component.
+ */
 const SleepDetail = () => {
   const [sleepHours, setSleepHours] = useState(0);
   const [inBedHours, setInBedHours] = useState(0);
   const [sleepGoal, setSleepGoal] = useState(0);
   const [sleepPercentage, setSleepPercentage] = useState(0);
-  const [sleepData, setSleepData] = useState([]);
+  const [sleepData, setSleepData] = useState<SleepEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [detailLoading, setDetailLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+
   const fixedDate = new Date(config.FIXED_DATE);
-  const yesterday = new Date(fixedDate); // Create a new Date instance
-  yesterday.setDate(yesterday.getDate() - 1); // Subtract 1 day
+  const yesterday = new Date(fixedDate);
+  yesterday.setDate(yesterday.getDate() - 1);
   const formattedYesterday = yesterday.toISOString().split('T')[0];
   const { userId } = useProfile();
-  
 
+  /**
+   * Custom theme settings for the Victory Bar Chart.
+   */
   const customThemeBarChart = {
     ...VictoryTheme.material,
     bar: {
@@ -60,6 +78,12 @@ const SleepDetail = () => {
     },
   };
 
+  /**
+   * Determines the progress bar color based on sleep percentage.
+   *
+   * @param {number} percentage - The percentage of the sleep goal achieved.
+   * @returns {string} Tailwind class for the color.
+   */
   const getProgressColor = (percentage: number) => {
     if (percentage <= 25) return "bg-red-500";
     if (percentage <= 50) return "bg-orange-500";
@@ -68,6 +92,9 @@ const SleepDetail = () => {
     return "bg-green-500";
   };
 
+  /**
+   * Fetches sleep data, including daily sleep summary, weekly trends, and goals.
+   */
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -127,6 +154,10 @@ const SleepDetail = () => {
 
   };
 
+  /**
+   * Fetches detailed sleep insights from the API.
+   * This can be a question, insight or adivce for the user
+   */
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
@@ -169,11 +200,13 @@ const SleepDetail = () => {
         showBackButton={true}
       />
 
+      {/* Sleep Summary */}
       <View className="flex-row justify-between mb-4 mt-4">
         <IconTextBox icon={icons.sleepTime} topText={sleepHours.toLocaleString()} bottomText="Hours asleep" />
         <IconTextBox icon={icons.sleeping} topText={inBedHours.toLocaleString()} bottomText="Hours in bed" />
       </View>
 
+      {/* Sleep Goal Progress */}
       <View>
         <Text className="text-xl font-bold mt-4">Sleep goal progress</Text>
         <View className="w-full flex items-center">
@@ -194,6 +227,7 @@ const SleepDetail = () => {
         </View>
       </View>
 
+      {/* Weekly Sleep Data */}
       <View>
         {detailLoading ? (
           <View className="items-center mt-5">

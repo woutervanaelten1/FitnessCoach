@@ -8,23 +8,39 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView } from "react-native";
 
+/**
+ * Targets & Progress screen displaying user activity metrics
+ * and tracking progress toward fitness goals.
+ *
+ * @returns {JSX.Element} The Targets screen component.
+ */
 const Targets = () => {
+  // States for current progress
   const [steps, setSteps] = useState(0);
   const [calories, setCalories] = useState(0);
   const [activeMinutes, setActiveMinutes] = useState(0);
   const [sleep, setSleep] = useState(0);
+  
+  // States for weekly averages
   const [weeklySteps, setWeeklySteps] = useState(0);
   const [weeklyCalories, setWeeklyCalories] = useState(0);
   const [weeklyMinutes, setWeeklyMinutes] = useState(0);
   const [weeklySleep, setWeeklySleep] = useState(0);
+
+  // States for user goals
   const [goalSteps, setGoalSteps] = useState(0);
   const [goalSleep, setGoalSleep] = useState(0);
   const [goalMinutes, setGoalMinutes] = useState(0);
   const [goalCalories, setGoalCalories] = useState(0);
+
+  // Loading and error handling states
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { userId } = useProfile();
 
+  /**
+   * Fetches the user's progress data, weekly averages, and goals.
+   */
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -43,7 +59,7 @@ const Targets = () => {
       const weeklyDataArray = await weekResponse.json();
       const goalDataArray = await goalResponse.json();
 
-      //Todays data
+      // Todays data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
       if (todayData) {
         setSteps(todayData.totalsteps);
@@ -52,10 +68,14 @@ const Targets = () => {
         setSleep(parseFloat((todayData.total_sleep_minutes / 60).toFixed(2)));
       }
 
-      //Weekly data
-      // Calculate weekly averages
+      // Weekly data, calculate weekly averages
       if (weeklyDataArray?.available_data?.length > 0) {
-
+        /**
+         * Calculates the weekly average for a given metric.
+         * @param {Array<any>} data - The array of weekly data.
+         * @param {string} field - The field to calculate the average for.
+         * @returns {number} The calculated weekly average.
+         */
         const calculateWeeklyAverage = (data: any[], field: string): number => {
           const total = data.reduce((sum, day) => sum + (day[field] || 0), 0);
           return total / data.length;
@@ -67,17 +87,20 @@ const Targets = () => {
         setWeeklySleep(parseFloat((calculateWeeklyAverage(weeklyDataArray.available_data, "total_sleep_minutes") / 60).toFixed(2)));
       }
 
+      // Process user goals
       if (goalDataArray && goalDataArray.length > 0) {
-        // Create a mapping for metrics to state setters
+        /**
+        * Mapping of metric names to state setters for updating goal values.
+        */
         const metricSetters = {
           steps: setGoalSteps,
           sleep: setGoalSleep,
           active_minutes: setGoalMinutes,
           calories: setGoalCalories,
         };
-      
-        // Loop through the goalDataArray to set the appropriate state
-        goalDataArray.forEach((goal : { metric: keyof typeof metricSetters; goal: number }) => {
+
+        // Set goals based on API response
+        goalDataArray.forEach((goal: { metric: keyof typeof metricSetters; goal: number }) => {
           const setter = metricSetters[goal.metric];
           if (setter) {
             setter(goal.goal);
@@ -93,6 +116,7 @@ const Targets = () => {
     }
   };
 
+  // Fetch data when the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchData();
@@ -114,12 +138,16 @@ const Targets = () => {
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: 15 }} className="p-4 flex-1 bg-white">
-
+      {/* Page Header */}
       <CustomHeader title="Targets & Progress" showBackButton={false} />
+
+      {/* Progress Boxes */}
       <ProgressBox value={steps} target={goalSteps} metric="Steps" progressBar={true} weeklyAverage={weeklySteps} />
       <ProgressBox value={activeMinutes} target={goalMinutes} metric="Active minutes" progressBar={true} weeklyAverage={weeklyMinutes} />
       <ProgressBox value={sleep} target={goalSleep} metric="Hours slept" progressBar={true} weeklyAverage={weeklySleep} />
       <ProgressBox value={calories} target={goalCalories} metric="Kcal burned" progressBar={true} weeklyAverage={weeklyCalories} />
+
+      {/* Action Buttons */}
       <CustomButton onPress={() => router.push("/dashboard/weightDetail")} title="Check weight progress" />
       <CustomButton onPress={() => router.push("/progress/editTargets")} title="Adjust targets" className="mt-2" />
     </ScrollView>

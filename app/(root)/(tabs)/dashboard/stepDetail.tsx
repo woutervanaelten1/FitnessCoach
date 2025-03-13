@@ -12,18 +12,36 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
+/**
+ * Represents a weekly step data entry.
+ */
+type StepEntry = {
+    day: string;
+    steps: number;
+    isFixedDate?: boolean;
+};
+
+/**
+ * The StepDetail screen provides an overview of the user's step tracking data,
+ * including total steps, distance covered, and weekly step trends.
+ *
+ * @returns {JSX.Element} The StepDetail screen component.
+ */
 const StepDetail = () => {
     const [steps, setSteps] = useState(0);
     const [stepGoal, setStepGoal] = useState(0);
     const [distance, setDistance] = useState(0);
-    const [stepData, setStepData] = useState([]);
+    const [stepData, setStepData] = useState<StepEntry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
     const [detailLoading, setDetailLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
     const { userId } = useProfile();
-    
+
+    /**
+     * Custom theme settings for the Victory Bar Chart.
+     */
     const customThemeBarChart = {
         ...VictoryTheme.material,
         bar: {
@@ -56,8 +74,9 @@ const StepDetail = () => {
         },
     };
 
-
-
+    /**
+     * Fetches step data, including daily step summary, weekly trends, and goals.
+     */
     const fetchData = async () => {
         try {
             setIsLoading(true);
@@ -117,6 +136,10 @@ const StepDetail = () => {
 
     };
 
+    /**
+   * Fetches detailed step insights from the API.
+   * This can be a question, insight or adivce for the user
+   */
     const fetchDetail = async () => {
         try {
             setDetailLoading(true);
@@ -156,19 +179,32 @@ const StepDetail = () => {
         <ScrollView className="flex-1 px-4 bg-white">
             <CustomHeader title="Steps overview" showBackButton={true} />
 
+            {/* Step Summary */}
             <View className="flex-row justify-between mb-4 mt-4">
                 <IconTextBox icon={icons.walking} topText={steps.toLocaleString()} bottomText="Steps" />
                 <IconTextBox icon={icons.ruler} topText={distance.toLocaleString()} bottomText="Km" />
             </View>
 
+            {/* Step Progress */}
             <View>
-                <Text className="text-black text-lg font-bold">
-                    You're{" "}
-                    <Text className="text-blue-500">{(stepGoal - steps).toLocaleString()} steps</Text> away from your goal!
-                </Text>
+                {steps >= stepGoal ? (
+                    <Text className="text-black text-lg font-bold">
+                        <Text className="text-blue-500">Goal reached!</Text> You've taken{" "}
+                        <Text className="text-blue-500">{steps.toLocaleString()} steps</Text>. Keep going!
+                    </Text>
+                ) : (
+                    <Text className="text-black text-lg font-bold">
+                        You're{" "}
+                        <Text className="text-blue-500">
+                            {(stepGoal - steps).toLocaleString()} steps
+                        </Text>{" "}
+                        away from your goal!
+                    </Text>
+                )}
                 <ProgressBar value={steps} target={stepGoal} />
             </View>
 
+            {/* Step Details */}
             <View>
                 {detailLoading ? (
                     <View className="items-center mt-5">
@@ -193,6 +229,7 @@ const StepDetail = () => {
                 )}
             </View>
 
+            {/* Weekly Steps Summary */}
             <Text className="text-black text-lg font-semibold mb-1 mt-6">Weekly steps summary</Text>
             <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
                 <VictoryChart height={224} theme={customThemeBarChart}>

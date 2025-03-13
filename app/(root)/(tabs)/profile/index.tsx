@@ -6,10 +6,20 @@ import { icons } from "@/constants";
 import { useState } from "react";
 import { FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
 
+/**
+ * Profile screen displaying user details and allowing profile switching.
+ *
+ * @returns {JSX.Element} The Profile screen component.
+ */
 const Profile = () => {
   const { activeProfile, userId, setActiveProfile } = useProfile();
   const [modalVisible, setModalVisible] = useState(false);
 
+  /**
+   * Handles switching between different user profiles.
+   *
+   * @param {keyof typeof config.PROFILES} userKey - The key of the selected user profile.
+   */
   const handleSwitchUser = (userKey: keyof typeof config.PROFILES) => {
     setActiveProfile(userKey);
     setModalVisible(false);
@@ -17,6 +27,7 @@ const Profile = () => {
 
   return (
     <View className="flex-1 px-4 bg-white">
+      {/* Header Section */}
       <CustomHeader
         title="Profile"
         showBackButton={false}
@@ -34,6 +45,7 @@ const Profile = () => {
         }
       />
 
+      {/* Profile Info Section */}
       <View className="items-center mt-6">
         <View className="w-24 h-24 rounded-full bg-black items-center justify-center">
           <Text className="text-blue-500 text-6xl">
@@ -53,6 +65,7 @@ const Profile = () => {
         </View>
       </View>
 
+      {/* User Details Section */}
       <View className="flex-row justify-between mt-6 bg-gray-100 rounded-lg p-4">
         <View className="items-center">
           <Text className="text-black text-xl font-bold">85,9 kg</Text>
@@ -68,12 +81,12 @@ const Profile = () => {
         </View>
       </View>
 
+      {/* Action Buttons */}
       <View>
         <CustomButton title="Edit information" className="mt-3" />
+        <CustomButton title="Switch User" className="mt-3" onPress={() => setModalVisible(true)} />
       </View>
 
-      {/* Switch User Button */}
-      <CustomButton title="Switch User" className="mt-3" onPress={() => setModalVisible(true)} />
 
       {/* User Switch Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">

@@ -4,6 +4,18 @@ import CustomButton from "./CustomButton";
 import config from "@/config";
 import { icons } from "@/constants";
 
+/**
+ * GoalEditModal Component
+ * A modal that allows users to edit their fitness goals. It fetches
+ * goal recommendations from the fitness coach and allows manual input.
+ *
+ * @param {boolean} isVisible - Controls the modal visibility.
+ * @param {number} goal - The current goal value.
+ * @param {string} metric - The fitness metric being edited (e.g., steps, calories).
+ * @param {() => void} onClose - Function to close the modal.
+ * @param {(newGoal: number) => void} onSave - Function to save the new goal.
+ */
+
 const GoalEditModal = ({
     isVisible,
     goal,
@@ -22,6 +34,7 @@ const GoalEditModal = ({
     const [isLoading, setIsLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
 
+    // Fetches a suggested goal from the API
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         setFetchError(false);
@@ -46,6 +59,7 @@ const GoalEditModal = ({
         }
     }, [metric, goal]);
 
+    // Fetches goal data when the modal opens
     useEffect(() => {
         if (isVisible) {
             setInputValue(goal.toString()); // Reset input value when modal opens

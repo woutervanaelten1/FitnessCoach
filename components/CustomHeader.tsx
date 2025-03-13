@@ -1,49 +1,92 @@
+import React, { memo } from "react";
+import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { icons } from "@/constants";
-import { RelativePathString, router, useRouter, useSegments } from "expo-router";
-import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native"
+import { useRouter } from "expo-router";
 
-const CustomHeader = ({ title, showBackButton = true, rightButton = null }: { title: string; showBackButton: boolean, rightButton?: React.ReactNode; }) => {
-    const router = useRouter();
+/**
+ * CustomHeader Component
+ * A reusable header with a back button and optional right button.
+ *
+ * @param {string} title - The title displayed in the center.
+ * @param {boolean} showBackButton - Whether to show the back button.
+ * @param {React.ReactNode} rightButton - An optional right-side button.
+ */
+const CustomHeader: React.FC<{ title: string; showBackButton?: boolean; rightButton?: React.ReactNode }> = ({
+  title,
+  showBackButton = true,
+  rightButton = null,
+}) => {
+  const router = useRouter();
 
-    const handleBackPress = () => {
-        if (router.canGoBack()) {
-            router.back();
-        } else {
-            // Fallback to home if no navigation history
-            router.replace('/home');
-        }
-    };
+  const handleBackPress = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/home");
+    }
+  };
 
-    return (
-        <View className="flex-row w-full items-center justify-between p-4 bg-white border-b border-gray-200">
-            {/* Back Button */}
-            {showBackButton ? (
-                <TouchableOpacity onPress={handleBackPress} className="flex items-center">
-                    <View className="w-8 h-8 bg-white rounded-full items-center justify-center">
-                        <Image
-                            source={icons.backArrow}
-                            resizeMode="contain"
-                            className="w-7 h-7"
-                            style={{ tintColor: "#307FE2" }}
-                        />
-                    </View>
-                </TouchableOpacity>
-            ) : (
-                // If no back button
-                <View style={{ width: 32 }} />
-            )}
-            <Text
-                className={`text-lg font-bold uppercase text-center ${rightButton ? "ml-12" : ""
-                    }`}
-                style={{ color: "#307FE2" }}
-            >
-                {title || ""}
-            </Text>
+  return (
+    <View style={styles.container}>
+      {/* Back Button */}
+      {showBackButton ? (
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton} accessibilityLabel="Go back">
+          <Image source={icons.backArrow} resizeMode="contain" style={styles.backIcon} />
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.placeholder} />
+      )}
 
-            {rightButton ? <View>{rightButton}</View> : <View style={{ width: 32 }} />}
-        </View>
-    )
-}
+      {/* Title */}
+      <Text style={[styles.title, rightButton ? styles.withRightButton : {}]}>
+        {title.trim() || ""}
+      </Text>
 
-export default CustomHeader;
+      {/* Right Button (Optional) */}
+      {rightButton ? <View>{rightButton}</View> : <View style={styles.placeholder} />}
+    </View>
+  );
+};
+
+// Styles for better performance and maintainability
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "white",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  backButton: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backIcon: {
+    width: 28,
+    height: 28,
+    tintColor: "#307FE2",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    textAlign: "center",
+    color: "#307FE2",
+    flex: 1,
+  },
+  withRightButton: {
+    marginLeft: 48,
+  },
+  placeholder: {
+    width: 32,
+  },
+});
+
+// Optimize with React.memo to prevent unnecessary re-renders
+export default memo(CustomHeader);

@@ -10,18 +10,24 @@ import RecommendationBox from "@/components/RecommendationBox";
 import RecommendationModal from "@/components/RecommendationModal";
 import { useProfile } from "@/app/context/ProfileContext";
 
+/**
+ * Represents a recommendation object.
+ */
+interface Recommendation {
+  recommendation: string;
+  reason: string;
+  benefit: string;
+  based_on: string;
+  metric: string;
+  question: string;
+}
 
+/**
+ * Home screen component displaying step progress, recommendations, and navigation.
+ *
+ * @returns {JSX.Element} The Home screen component.
+ */
 const Home = () => {
-  interface Recommendation {
-    recommendation: string;
-    reason: string;
-    benefit: string;
-    based_on: string;
-    metric: string;
-    question: string;
-  }
-
-
   const [currentSteps, setCurrentSteps] = useState(0);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(true);
@@ -34,8 +40,9 @@ const Home = () => {
   const [fetchError, setFetchError] = useState(false);
   const { userId } = useProfile();
 
-
-
+  /**
+   * Fetches the user's step data for the current date.
+   */
   const fetchStepData = async () => {
     try {
       setHasError(false);
@@ -52,6 +59,9 @@ const Home = () => {
     }
   };
 
+  /**
+   * Fetches the recommendations for the current date.
+   */
   const fetchRecommendations = async () => {
     try {
       setFetchError(false);
@@ -74,11 +84,22 @@ const Home = () => {
     fetchRecommendations();
   }, [userId]);
 
+  /**
+   * Opens the recommendation modal with details.
+   *
+   * @param {Recommendation} rec - The selected recommendation.
+   */
   const handleOpenModal = (rec: Recommendation) => {
     setSelectedRecommendation(rec);
     setModalVisible(true);
   };
 
+  /**
+ * Navigates to the chatbot with the selected recommendation's question.
+ * This automatically sends the question to the chatbot
+ *
+ * @param {string} question - The question to ask the chatbot.
+ */
   const handleAskChatbot = (question: string) => {
     if (!question.trim()) return; // Exit if something went wrong or the question is empty
     setModalVisible(false)
@@ -92,6 +113,7 @@ const Home = () => {
       <Text className="p-4 text-blue-500 text-4xl font-bold">Welcome Wouter!</Text>
       <Image source={images.dumbell} className="z-0 w-full h-[200px]" />
 
+      {/* Step Data Section */}
       <View className="items-center my-5 w-full align-middle">
         {isLoadingData ? (
           <ActivityIndicator size="large" color="#307FE2" />
@@ -117,6 +139,7 @@ const Home = () => {
         )}
       </View>
 
+      {/* Recommendations for today */}
       <View className="w-11/12">
         <Text className="text-2xl font-bold mb-2">Recommendations</Text>
         <Text className="text-blue-500 font-semibold text-base mb-4">
@@ -141,9 +164,10 @@ const Home = () => {
         )}
       </View>
 
-
+      {/* Start a new chat */}
       <CustomButton title="Start a new chat!" onPress={() => router.push("../(tabs)/chat/chat")} className="w-11/12 my-4" />
 
+      {/* Recommendation Modal */}
       <RecommendationModal
         isVisible={modalVisible}
         onClose={() => setModalVisible(false)}

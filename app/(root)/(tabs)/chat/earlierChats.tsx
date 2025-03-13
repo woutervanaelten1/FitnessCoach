@@ -8,14 +8,25 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
+/**
+ * Represents a past conversation subject.
+ */
+interface Subject {
+  conversation_id: string;
+  user_id: string;
+  subject: string;
+  first_message: string;
+  timestamp: string;
+}
+
+
+/**
+ * The EarlierChats screen displays past conversations of the user.
+ * Users can view, load more, and navigate to individual conversations.
+ *
+ * @returns {JSX.Element} The EarlierChats screen component.
+ */
 const EarlierChats = () => {
-  interface Subject {
-    conversation_id: string;
-    user_id: string;
-    subject: string;
-    first_message: string;
-    timestamp: string;
-  }
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -26,6 +37,12 @@ const EarlierChats = () => {
   const [totalConversations, setTotalConversations] = useState<number | null>(null);
   const { userId } = useProfile();
 
+  /**
+   * Fetches earlier conversations from the API.
+   * Handles loading, errors, and pagination.
+   *
+   * @param {boolean} [loadMore=false] - Whether to load more conversations or fetch fresh data.
+   */
   const fetchData = async (loadMore = false) => {
     try {
       if (loadMore) {
@@ -44,7 +61,7 @@ const EarlierChats = () => {
       const newSubjects = data.conversations || [];
       setTotalConversations(data.total); // Update the total count of conversations
 
-      // Append or replace data while avoiding duplicates
+      // Append new data while avoiding duplicates
       setSubjects((prev) => {
         const mergedSubjects = [...prev, ...newSubjects];
         return Array.from(
@@ -52,7 +69,7 @@ const EarlierChats = () => {
         );
       });
 
-      // Update offset
+      // Update offset for pagination
       setOffset(offset + limit);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -66,7 +83,9 @@ const EarlierChats = () => {
     }
   };
 
-  // Load more conversations when "Load More" is pressed
+  /**
+   * Loads more conversations if there are remaining ones.
+   */
   const loadMoreConversations = () => {
     if (subjects.length < (totalConversations || 0)) {
       setOffset((prevOffset) => prevOffset + limit); // Increase offset
@@ -74,6 +93,7 @@ const EarlierChats = () => {
     }
   };
 
+  // Fetch data when the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchData();

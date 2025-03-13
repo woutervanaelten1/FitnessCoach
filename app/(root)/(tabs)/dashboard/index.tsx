@@ -10,26 +10,66 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
 
+/**
+ * Represents a weekly sleep data entry.
+ */
+type SleepEntry = {
+  day: string;
+  hours: number;
+  isFixedDate?: boolean;
+};
+
+/**
+ * Represents a heart rate entry.
+ */
+type HeartRateEntry = {
+  time: number;
+  rate: number;
+};
+
+/**
+ * Represents a weight entry.
+ */
+type WeightEntry = {
+  day: string;
+  weight: number;
+};
+
+/**
+ * The Dashboard screen provides an overview of various fitness metrics, including:
+ * - Steps
+ * - Calories Burned
+ * - Active Minutes
+ * - Sleep Data
+ * - Heart Rate
+ * - Weight Data
+ * 
+ * @returns {JSX.Element} The Dashboard screen component.
+ */
+
 const Dashboard = () => {
   const [steps, setSteps] = useState(0);
   const [calories, setCalories] = useState(0);
   const [activeMinutes, setActiveMinutes] = useState(0);
-  const [sleepData, setSleepData] = useState([]);
-  const [heartRateData, setHeartRateData] = useState([]);
-  const [weightData, setWeightData] = useState<{ day: string; weight: number }[]>([]);
+  const [sleepData, setSleepData] = useState<SleepEntry[]>([]);
+  const [heartRateData, setHeartRateData] = useState<HeartRateEntry[]>([]);
+  const [weightData, setWeightData] = useState<WeightEntry[]>([]);
   const [minWeight, setMinWeight] = useState<number | null>(null);
   const [maxWeight, setMaxWeight] = useState<number | null>(null);
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
-  const fixedDate = new Date(config.FIXED_DATE);
-  const yesterday = new Date(fixedDate); // Create a new Date instance
-  yesterday.setDate(yesterday.getDate() - 1); // Subtract 1 day
-  const formattedYesterday = yesterday.toISOString().split('T')[0];
   const { userId } = useProfile();
 
+  const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
+  const fixedDate = new Date(config.FIXED_DATE);
+  const yesterday = new Date(fixedDate);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const formattedYesterday = yesterday.toISOString().split('T')[0];
 
+  /**
+   * Custom theme settings for the Victory Bar Chart.
+   */
   const customThemeBarChart = {
     ...VictoryTheme.material,
     bar: {
@@ -62,6 +102,9 @@ const Dashboard = () => {
     },
   };
 
+  /**
+   * Custom theme settings for the Victory Line Chart.
+   */
   const customThemeLineChart = {
     ...VictoryTheme.material,
     area: {
@@ -99,7 +142,9 @@ const Dashboard = () => {
     },
   };
 
-
+  /**
+   * Fetches dashboard data including steps, calories, active minutes, sleep, heart rate, and weight.
+   */
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -165,7 +210,7 @@ const Dashboard = () => {
         setWeightData(processedWeight);
       }
 
-      // Cache the data in AsyncStorage
+      // Cache the data in AsyncStorage. This can be used when new data like weight entry is added
       await AsyncStorage.setItem(
         'dashboardData',
         JSON.stringify({ steps, calories, activeMinutes, sleepData, heartRateData, weightData, currentWeight, minWeight, maxWeight })
@@ -235,7 +280,7 @@ const Dashboard = () => {
       <Text className="text-black text-xl font-bold mb-1 mt-2">{config.FIXED_DATE}</Text>
       <Text className="text-blue-500 font-semibold text-sm mb-4">Touch one of the icons for more information</Text>
 
-
+      {/* Overview Metrics */}
       <View className="flex-row justify-between mb-4 mt-4">
         <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/calorieDetail")}>
           <IconTextBox icon={icons.fire} topText={calories.toLocaleString()} bottomText="kcal" />
@@ -298,9 +343,9 @@ const Dashboard = () => {
           />
         </VictoryChart>
       </View>
-
+      
+      {/* Weight Section */}
       <View>
-        {/* Weight Section */}
         <Text className="text-black text-lg font-semibold mb-1">Weight journey (in kgs)</Text>
         <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight} kg</Text></Text>
         <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">

@@ -11,10 +11,25 @@ import { ScrollView, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { VictoryArea, VictoryAxis, VictoryChart, VictoryLabel, VictoryScatter, VictoryTheme } from "victory-native";
 
+/**
+ * Represents a weight data entry.
+ */
+type WeightEntry = {
+    day: string;
+    weight: number;
+    isFixedDate?: boolean;
+};
+
+/**
+ * The WeightDetail screen provides an overview of the user's weight tracking data,
+ * including the current weight, target weight, and a weekly weight history.
+ *
+ * @returns {JSX.Element} The WeightDetail screen component.
+ */
 const StepDetail = () => {
     const [currentWeight, setCurrentWeight] = useState(0);
     const [targetWeight, setTargetWeight] = useState(0);
-    const [weightData, setWeightData] = useState<{ day: string; weight: number; isFixedDate?: boolean }[]>([]);
+    const [weightData, setWeightData] = useState<WeightEntry[]>([]);
     const [minWeight, setMinWeight] = useState<number | null>(null);
     const [maxWeight, setMaxWeight] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +38,9 @@ const StepDetail = () => {
     const [isInputModalVisible, setIsInputModalVisible] = useState(false);
     const { userId } = useProfile();
 
+    /**
+     * Custom theme settings for the Victory Line Chart.
+     */
     const customThemeLineChart = {
         ...VictoryTheme.material,
         area: {
@@ -60,7 +78,9 @@ const StepDetail = () => {
         },
     };
 
-
+    /**
+     * Fetches the user's weight data, goal weight, and historical weight logs.
+     */
     const fetchData = async () => {
         try {
             setIsLoading(true);
@@ -79,18 +99,18 @@ const StepDetail = () => {
             const weeklyDataArray = await weeklyResponse.json();
             const goalData = await goalResponse.json();
 
-            // Goal Data
+            // Set Goal Data
             if (goalData) {
                 setTargetWeight(goalData.goal);
             }
 
-            //Current weight
+            // Set current weight
             const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
             if (todayData) {
                 setCurrentWeight(todayData.weightkg);
             }
 
-            // Weight data
+            // Process Weekly Weight Data
             if (weeklyDataArray.available_data?.length > 0) {
                 const processedWeight = weeklyDataArray.available_data.map(
                     (item: { date: string; weightkg: number }) => {
@@ -248,10 +268,13 @@ const StepDetail = () => {
         <ScrollView className="flex-1 px-4 bg-white">
             <CustomHeader title="Weight overview" showBackButton={true} />
 
+            {/* Current & Target Weight */}
             <View className="flex-row justify-between mb-2 mt-4">
                 <IconTextBox icon={icons.scale} topText={currentWeight.toLocaleString() + " kg"} bottomText="Current weight" />
                 <IconTextBox icon={icons.target} topText={targetWeight.toLocaleString() + " kg"} bottomText="Target weight" />
             </View>
+
+            {/* Log & Edit Weight Buttons */}
             <View className="flex-row justify-between">
                 <View className="flex-1 mr-1">
                     <CustomButton title="Log Weight" onPress={() => setIsInputModalVisible(true)} />
@@ -261,8 +284,8 @@ const StepDetail = () => {
                 </View>
             </View>
 
+            {/* Weight Journey Chart */}
             <View className="mt-6">
-                {/* Weight Section */}
                 <Text className="text-black text-xl font-bold mb-1">Weight journey (in kgs)</Text>
                 <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight} kg</Text></Text>
                 <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
@@ -303,6 +326,7 @@ const StepDetail = () => {
                 </View>
             </View>
 
+            {/* Modals */}
             <InputModal
                 isVisible={isGoalEditModalVisible}
                 title="Set a new target weight!"

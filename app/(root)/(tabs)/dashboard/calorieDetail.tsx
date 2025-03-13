@@ -11,10 +11,25 @@ import DetailView from "@/components/DetailComponent";
 import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
 
+/**
+ * Represents the structure of hourly calorie data.
+ */
+type HourlyCalorie = {
+  time: number;
+  calories: number;
+};
+
+
+/**
+ * The CalorieDetail screen provides an overview of the user's calorie data,
+ * including total calories burned, progress towards goals, and an hourly breakdown.
+ *
+ * @returns {JSX.Element} The CalorieDetail screen component.
+ */
 const CalorieDetail = () => {
   const [calories, setCalories] = useState(0);
   const [caloriegoal, setCalorieGoal] = useState(0);
-  const [hourlyCalories, setHourlyCalorie] = useState<{ time: number; calories: number }[]>([]);
+  const [hourlyCalories, setHourlyCalorie] = useState<HourlyCalorie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -23,9 +38,11 @@ const CalorieDetail = () => {
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const { userId } = useProfile();
-  
 
 
+  /**
+   * Custom theme settings for the Victory Bar Chart.
+   */
   const customThemeBarChart = {
     ...VictoryTheme.material,
     bar: {
@@ -63,7 +80,9 @@ const CalorieDetail = () => {
   };
 
 
-
+  /**
+   * Fetches calorie data from the API, including daily and hourly calorie burn.
+   */
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -82,18 +101,18 @@ const CalorieDetail = () => {
       const hourlyDataArray = await hourlyResponse.json();
       const goalData = await goalResponse.json();
 
-      // Goal Data
+      // Set Calorie Goal
       if (goalData) {
         setCalorieGoal(goalData.goal);
       }
 
-      // Today Data
+      // Set Todays Calorie Data
       const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
       if (todayData) {
         setCalories(todayData.calories);
       }
 
-      // Hourly calorie Data
+      // Process Hourly Calorie Data
       if (hourlyDataArray) {
         const processedData = hours.map((hour) => {
           const match = hourlyDataArray.find(
@@ -116,6 +135,10 @@ const CalorieDetail = () => {
 
   };
 
+  /**
+   * Fetches detailed calorie insights from the API.
+   * This can be a question, insight or adivce for the user
+   */
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
@@ -154,6 +177,7 @@ const CalorieDetail = () => {
     <ScrollView className="flex-1 px-4 bg-white">
       <CustomHeader title="Calorie overview" showBackButton={true} />
 
+      {/* Calorie Summary */}
       <View className="flex-row justify-between mb-4 mt-4">
         <IconTextBox icon={icons.fire} topText={calories.toLocaleString()} bottomText="kcal burned" />
         <View className="flex-1 items-center justify-center bg-gray-100 rounded-lg p-4 mx-1">
@@ -161,6 +185,7 @@ const CalorieDetail = () => {
         </View>
       </View>
 
+      {/* Additional Insights */}
       <View>
         {detailLoading ? (
           <View className="items-center mt-5">
@@ -178,13 +203,14 @@ const CalorieDetail = () => {
           </View>
         ) : detail ? (
           <DetailView
-            detail={{ type: detail.type, content: detail.content}}
+            detail={{ type: detail.type, content: detail.content }}
           />
         ) : (
           <Text className="text-gray-500 text-lg">No details found.</Text>
         )}
       </View>
 
+      {/* Hourly Breakdown */}
       <Text className="text-black text-lg font-semibold mb-1 mt-6">Hourly calorie breakdown</Text>
       <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
         <VictoryChart

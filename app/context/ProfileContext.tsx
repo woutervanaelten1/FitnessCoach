@@ -1,17 +1,24 @@
 import React, { createContext, useState, useContext } from "react";
 import config from "@/config";
 
-// Define context type
+/**
+ * Type definition for the profile context.
+ */
 type ProfileContextType = {
   activeProfile: keyof typeof config.PROFILES;
   userId: string;
   setActiveProfile: (profile: keyof typeof config.PROFILES) => void;
 };
 
-// Create context
+// Create context 
 export const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
-// Provider component
+/**
+ * ProfileProvider component that manages user profiles.
+ * 
+ * @param {object} props - Component props
+ * @param {React.ReactNode} props.children - Children components
+ */
 export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeProfile, setActiveProfile] = useState<keyof typeof config.PROFILES>("user1");
 
@@ -28,7 +35,11 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   );
 };
 
-// Custom hook for using ProfileContext
+/**
+ * Custom hook for accessing the profile context.
+ * @throws Error if used outside ProfileProvider.
+ * @returns {ProfileContextType} - The profile context value.
+ */
 export const useProfile = () => {
   const context = useContext(ProfileContext);
   if (!context) {
