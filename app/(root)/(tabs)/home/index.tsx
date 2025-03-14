@@ -66,7 +66,7 @@ const Home = () => {
     try {
       setFetchError(false);
       setIsLoadingRecommendation(true);
-      const recommendationsResponse = await fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}`);
+      const recommendationsResponse = await fetch(`${config.API_BASE_URL}/chat/recommendations?date=${config.FIXED_DATE}&user_id=${userId}`);
       if (!recommendationsResponse.ok) throw new Error("Failed to fetch recommendations");
       const recommendationsData = await recommendationsResponse.json();
       setRecommendations(recommendationsData.recommendations || []);

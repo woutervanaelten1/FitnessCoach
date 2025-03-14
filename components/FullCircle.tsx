@@ -24,17 +24,17 @@ const FullCircle = ({ value, goal, metric="" }: { value: number; goal: number; m
         ]}
         colorScale={["#4A90E2", "#E0E0E0"]}
         innerRadius={40}
-        width={140}
-        height={140}
+        width={200}
+        height={200}
         style={{ labels: { display: "none" } }}
       />
-      <View style={styles.textContainer}>
-        <Text style={styles.percentageText}>{goal > 0 ? `${Math.round(percentage)}%` : "No Goal"}</Text>
-        {goal > 0 && (
-          <Text style={styles.goalText}>
-            {`Goal: ${goal.toLocaleString()} ${metric}`}
-          </Text>
-        )}
+      <View style={{ position: "absolute", alignItems: "center" }}>
+        <Text style={{ fontSize: 20, fontWeight: "bold", color: "#4A90E2" }}>
+          {Math.round(percentage)}%
+        </Text>
+        <Text className="text-center" style={{ fontSize: 14,  color: "#4A90E2" }}>
+          Goal: {goal} {metric}
+        </Text>
       </View>
     </View>
   );

@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import LoadingErrorView from "@/components/LoadingErrorView";
+import { useProfile } from "@/app/context/ProfileContext";
 
 /**
 * Represents a suggested chat question.
@@ -26,6 +27,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const { userId } = useProfile();
 
   /**
    * Fetches suggested questions from the backend API.
@@ -35,7 +37,7 @@ const Index = () => {
     try {
       setIsLoading(true);
       setHasError(false);
-      const response = await fetch(`${config.API_BASE_URL}/chat/suggested_questions`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/suggested_questions?user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();

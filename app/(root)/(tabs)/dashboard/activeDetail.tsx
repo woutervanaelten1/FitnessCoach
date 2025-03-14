@@ -44,6 +44,16 @@ const ActivityDetail = () => {
   };
 
   /**
+   * Checks if a given string is a valid detail type.
+   *
+   * @param {string} type - The type to validate.
+   * @returns {boolean} `true` if the type is "question", "advice", or "insight"; otherwise, `false`.
+   */
+  const isValidDetailType = (type: string): type is "question" | "advice" | "insight" => {
+    return ["question", "advice", "insight"].includes(type);
+  };
+
+  /**
    * Fetches activity data and user's active minutes goal from the API.
    */
   const fetchData = async () => {
@@ -92,7 +102,7 @@ const ActivityDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=activity`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=activity&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -190,10 +200,8 @@ const ActivityDetail = () => {
               className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
             />
           </View>
-        ) : detail ? (
-          <DetailView
-            detail={{ type: detail.type, content: detail.content }}
-          />
+        ) : detail && isValidDetailType(detail.type) ? (
+          <DetailView detail={{ type: detail.type, content: detail.content }} />
         ) : (
           <Text className="text-gray-500 text-lg">No details found.</Text>
         )}

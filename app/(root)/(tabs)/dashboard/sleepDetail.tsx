@@ -93,6 +93,16 @@ const SleepDetail = () => {
   };
 
   /**
+   * Checks if a given string is a valid detail type.
+   *
+   * @param {string} type - The type to validate.
+   * @returns {boolean} `true` if the type is "question", "advice", or "insight"; otherwise, `false`.
+   */
+    const isValidDetailType = (type: string): type is "question" | "advice" | "insight" => {
+      return ["question", "advice", "insight"].includes(type);
+    };
+
+  /**
    * Fetches sleep data, including daily sleep summary, weekly trends, and goals.
    */
   const fetchData = async () => {
@@ -161,7 +171,7 @@ const SleepDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedYesterday}&metric=sleep`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedYesterday}&metric=sleep&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -243,7 +253,7 @@ const SleepDetail = () => {
               className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg"
             />
           </View>
-        ) : detail ? (
+        ) : detail && isValidDetailType(detail.type) ? (
           <DetailView
             detail={{ type: detail.type, content: detail.content }}
           />

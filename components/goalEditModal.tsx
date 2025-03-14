@@ -3,6 +3,7 @@ import { View, Text, TextInput, Modal, ActivityIndicator, Image } from "react-na
 import CustomButton from "./CustomButton";
 import config from "@/config";
 import { icons } from "@/constants";
+import { useProfile } from "@/app/context/ProfileContext";
 
 /**
  * GoalEditModal Component
@@ -33,6 +34,7 @@ const GoalEditModal = ({
     const [goalSuggestion, setGoalSuggestion] = useState<{ goal: string; justification: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
+    const { userId } = useProfile();
 
     // Fetches a suggested goal from the API
     const fetchData = useCallback(async () => {
@@ -40,7 +42,7 @@ const GoalEditModal = ({
         setFetchError(false);
         try {
             const response = await fetch(
-                `${config.API_BASE_URL}/chat/new_goal?date=${config.FIXED_DATE}&metric=${metric}&current_goal=${goal}`
+                `${config.API_BASE_URL}/chat/new_goal?date=${config.FIXED_DATE}&metric=${metric}&current_goal=${goal}&user_id=${userId}`
             );
             if (!response.ok) throw new Error("Failed to fetch data");
 
