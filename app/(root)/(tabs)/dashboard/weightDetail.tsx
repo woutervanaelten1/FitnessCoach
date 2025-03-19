@@ -26,7 +26,7 @@ type WeightEntry = {
  *
  * @returns {JSX.Element} The WeightDetail screen component.
  */
-const StepDetail = () => {
+const WeightDetail = () => {
     const [currentWeight, setCurrentWeight] = useState(0);
     const [targetWeight, setTargetWeight] = useState(0);
     const [weightData, setWeightData] = useState<WeightEntry[]>([]);
@@ -106,6 +106,7 @@ const StepDetail = () => {
 
             // Set current weight
             const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
+            console.log(todayData);
             if (todayData) {
                 setCurrentWeight(todayData.weightkg);
             }
@@ -287,43 +288,52 @@ const StepDetail = () => {
             {/* Weight Journey Chart */}
             <View className="mt-6">
                 <Text className="text-black text-xl font-bold mb-1">Weight journey (in kgs)</Text>
-                <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight} kg</Text></Text>
-                <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-                    <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
-                        <VictoryAxis
-                            tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
-                            style={customThemeLineChart.axisBottom.style}
-                        />
-                        <VictoryAxis
-                            dependentAxis
-                            tickFormat={(t) => `${t}`} // Add "kg" to weight values
-                            style={customThemeLineChart.axisLeft.style}
-                        />
-                        <VictoryArea
-                            data={weightData}
-                            x="day"
-                            y="weight"
-                            interpolation="monotoneX"
-                            style={customThemeLineChart.area.style}
-                        />
-                        {weightData.length > 0 && (
-                            <VictoryScatter
-                                data={weightData}
-                                x="day"
-                                y="weight"
-                                size={3}
-                                style={{ data: { fill: "#4A90E2" } }}
-                                labels={({ datum }) => `${datum.weight} kg`}
-                                labelComponent={
-                                    <VictoryLabel
-                                        dy={-12}
-                                        style={{ fontSize: 11, fill: "#307FE2" }}
+                {weightData.length > 0 ? (
+                    <>
+                        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)} kg</Text></Text>
+                        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+                            <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
+                                <VictoryAxis
+                                    tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
+                                    style={customThemeLineChart.axisBottom.style}
+                                />
+                                <VictoryAxis
+                                    dependentAxis
+                                    tickFormat={(t) => `${t}`} // Add "kg" to weight values
+                                    style={customThemeLineChart.axisLeft.style}
+                                />
+                                <VictoryArea
+                                    data={weightData}
+                                    x="day"
+                                    y="weight"
+                                    interpolation="monotoneX"
+                                    style={customThemeLineChart.area.style}
+                                />
+                                {weightData.length > 0 && (
+                                    <VictoryScatter
+                                        data={weightData}
+                                        x="day"
+                                        y="weight"
+                                        size={3}
+                                        style={{ data: { fill: "#4A90E2" } }}
+                                        labels={({ datum }) => `${datum.weight} kg`}
+                                        labelComponent={
+                                            <VictoryLabel
+                                                dy={-12}
+                                                style={{ fontSize: 11, fill: "#307FE2" }}
+                                            />
+                                        }
                                     />
-                                }
-                            />
-                        )}
-                    </VictoryChart>
-                </View>
+                                )}
+                            </VictoryChart>
+                        </View>
+                    </>
+                ) : (
+                    <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+                        <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
+                    </View>
+
+                )}
             </View>
 
             {/* Modals */}
@@ -350,4 +360,4 @@ const StepDetail = () => {
         </ScrollView>
     );
 };
-export default StepDetail;
+export default WeightDetail;

@@ -1,6 +1,7 @@
 import { Tabs, usePathname } from "expo-router";
 import { View, Image, ImageSourcePropType, SafeAreaView } from "react-native";
 import { icons } from "@/constants";
+import { useEffect, useRef } from "react";
 
 /**
  * Tab icon component for the bottom navigation.
@@ -24,6 +25,32 @@ const TabIcon = ({ source, focused }: { source: ImageSourcePropType, focused: bo
 
 const Layout = () => {
     const pathname = usePathname();
+    const lastScreen = useRef<string | null>(null);
+    const startTime = useRef<number | null>(null);
+  
+    // useEffect(() => {
+    //   const now = Date.now();
+  
+    //   if (lastScreen.current && startTime.current) {
+    //     const timeSpent = now - startTime.current;
+    //     console.log(`User spent ${timeSpent}ms on ${lastScreen.current}`);
+        
+    //     // Send data to FastAPI backend (optional)
+    //     fetch("TODO-make-endpoint", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify({
+    //         eventType: "screen_time",
+    //         screen: lastScreen.current,
+    //         duration: timeSpent,
+    //       }),
+    //     }).catch((error) => console.error("Error sending time spent data:", error));
+    //   }
+  
+    //   // Update the current screen and start time
+    //   lastScreen.current = pathname;
+    //   startTime.current = now;
+    // }, [pathname]);
 
     /**
      * Determines if a tab should be highlighted based on the current path.

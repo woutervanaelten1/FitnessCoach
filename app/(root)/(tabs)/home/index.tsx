@@ -38,7 +38,8 @@ const Home = () => {
   const [selectedRecommendation, setSelectedRecommendation] = useState<Recommendation | null>(null);
   const [hasError, setHasError] = useState(false);
   const [fetchError, setFetchError] = useState(false);
-  const { userId } = useProfile();
+  const { userId, activeProfile } = useProfile();
+  const username = config.PROFILES[activeProfile]?.username || "User";
 
   /**
    * Fetches the user's step data for the current date.
@@ -110,7 +111,7 @@ const Home = () => {
   return (
     <ScrollView contentContainerStyle={{ alignItems: "center" }} className="w-full  bg-white">
       <CustomHeader title="Home" showBackButton={false} />
-      <Text className="p-4 text-blue-500 text-4xl font-bold">Welcome Wouter!</Text>
+      <Text className="p-4 text-blue-500 text-4xl font-bold">Welcome {username}!</Text>
       <Image source={images.dumbell} className="z-0 w-full h-[200px]" />
 
       {/* Step Data Section */}

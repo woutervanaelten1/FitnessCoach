@@ -343,48 +343,59 @@ const Dashboard = () => {
           />
         </VictoryChart>
       </View>
-      
+
       {/* Weight Section */}
       <View>
         <Text className="text-black text-lg font-semibold mb-1">Weight journey (in kgs)</Text>
-        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight} kg</Text></Text>
-        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-          <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
-            <VictoryAxis
-              tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
-              style={customThemeLineChart.axisBottom.style}
-            />
-            <VictoryAxis
-              dependentAxis
-              tickFormat={(t) => `${t}`}
-              style={customThemeLineChart.axisLeft.style}
-            />
-            <VictoryArea
-              data={weightData}
-              x="day"
-              y="weight"
-              interpolation="monotoneX"
-              style={customThemeLineChart.area.style}
-            />
-            {weightData.length > 0 && (
-              <VictoryScatter
-                data={[weightData[weightData.length - 1]]} // Last data point (today)
+        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)}kg</Text></Text>
+        <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
+        <TouchableOpacity className="relative z-10" onPress={() => { router.push("/dashboard/weightDetail"); }}>
+        {weightData.length > 0 ? (
+          <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+            <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
+              <VictoryAxis
+                tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
+                style={customThemeLineChart.axisBottom.style}
+              />
+              <VictoryAxis
+                dependentAxis
+                tickFormat={(t) => `${t}`}
+                style={customThemeLineChart.axisLeft.style}
+              />
+              <VictoryArea
+                data={weightData}
                 x="day"
                 y="weight"
-                size={3}
-                style={{ data: { fill: "#307FE2" } }}
-                labels={({ datum }) => `${datum.weight} kg`}
-                labelComponent={
-                  <VictoryLabel
-                    dy={-12}
-                    style={{ fontSize: 12, fill: "#307FE2" }}
-                  />
-                }
+                interpolation="monotoneX"
+                style={customThemeLineChart.area.style}
               />
-            )}
-          </VictoryChart>
-        </View>
+              {weightData.length > 0 && (
+                <VictoryScatter
+                  data={[weightData[weightData.length - 1]]} // Last data point (today)
+                  x="day"
+                  y="weight"
+                  size={3}
+                  style={{ data: { fill: "#307FE2" } }}
+                  labels={({ datum }) => `${datum.weight} kg`}
+                  labelComponent={
+                    <VictoryLabel
+                      dy={-12}
+                      style={{ fontSize: 12, fill: "#307FE2" }}
+                    />
+                  }
+                />
+              )}
+            </VictoryChart>
+          </View>
+        ) : (
+          <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+            <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
+          </View>
+
+        )}
+        </TouchableOpacity>
       </View>
+      
     </ScrollView>
   );
 };
