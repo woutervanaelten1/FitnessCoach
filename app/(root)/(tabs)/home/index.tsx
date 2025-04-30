@@ -2,7 +2,7 @@ import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import { images } from "@/constants";
 import { router } from "expo-router";
-import { Image, ScrollView, Text, View, ActivityIndicator, TouchableOpacity } from "react-native";
+import { Image, ScrollView, Text, View, ActivityIndicator } from "react-native";
 import config from "@/config";
 import { useEffect, useState } from "react";
 import React from 'react';
@@ -121,9 +121,11 @@ const Home = () => {
         ) : hasError ? (
           <View className="p-4 rounded-lg flex items-center">
             <Text className="text-blue-500 text-base mb-2 font-bold">Failed to load step data.</Text>
-            <TouchableOpacity onPress={fetchStepData} className="w-1/2 bg-blue-500 rounded-lg p-3 px-5">
-              <Text className="text-lg font-bold text-white">Retry</Text>
-            </TouchableOpacity>
+            <CustomButton
+              title="Retry"
+              onPress={fetchStepData}
+              className="w-1/2 bg-blue-500 rounded-lg p-3 px-5"
+            />
           </View>
         ) : currentSteps ? (
           <>
@@ -166,7 +168,7 @@ const Home = () => {
       </View>
 
       {/* Start a new chat */}
-      <CustomButton title="Start a new chat!" onPress={() => router.push("../(tabs)/chat/chat")} className="w-11/12 my-4" />
+      <CustomButton title="Start a new chat!" onPress={() => router.push("../(tabs)/chat/chat") } className="w-11/12 my-4" />
 
       {/* Recommendation Modal */}
       <RecommendationModal

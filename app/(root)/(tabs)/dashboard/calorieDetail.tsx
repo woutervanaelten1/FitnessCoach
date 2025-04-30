@@ -10,6 +10,7 @@ import CustomButton from "@/components/CustomButton";
 import DetailView from "@/components/DetailComponent";
 import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
+import DatePicker from "@/components/DatePicker";
 
 /**
  * Represents the structure of hourly calorie data.
@@ -35,6 +36,7 @@ const CalorieDetail = () => {
   const [hasError, setHasError] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const { userId } = useProfile();
@@ -96,9 +98,10 @@ const CalorieDetail = () => {
     try {
       setIsLoading(true);
       setHasError(false);
+      const formattedDate = selectedDate.toISOString().split("T")[0];
       const [todayResponse, hourlyResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
-        fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/hourly_merged/by-date?date=${formattedDate}&user_id=${userId}`),
         fetch(`${config.API_BASE_URL}/data/goals/${userId}/calories`),
       ]);
 
@@ -151,7 +154,8 @@ const CalorieDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=calories&user_id=${userId}`);
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedDate}&metric=calories&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -167,7 +171,7 @@ const CalorieDetail = () => {
   useEffect(() => {
     fetchData();
     fetchDetail();
-  }, []);
+  }, [userId, selectedDate]);
 
   if (isLoading || hasError) {
     return (
@@ -178,6 +182,8 @@ const CalorieDetail = () => {
         loadingText="Loading your calorie data..."
         errorText="Failed to load your calorie data. Do you want to try again?"
         headerTitle="Targets & Progress"
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
       />
     );
   }
@@ -185,6 +191,8 @@ const CalorieDetail = () => {
   return (
     <ScrollView className="flex-1 px-4 bg-white">
       <CustomHeader title="Calorie overview" showBackButton={true} />
+
+      <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate}/>
 
       {/* Calorie Summary */}
       <View className="flex-row justify-between mb-4 mt-4">

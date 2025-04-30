@@ -4,6 +4,7 @@ import GoalEditModal from "@/components/goalEditModal";
 import LoadingErrorView from "@/components/LoadingErrorView";
 import ProgressBox from "@/components/ProgressBox";
 import config from "@/config";
+import { logClick } from "@/utils/clickLogger";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity } from "react-native";
 import Toast from "react-native-toast-message";
@@ -34,7 +35,7 @@ const Targets = () => {
 
   // Modal states for goal editing
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<{ metric: string; currentTarget: number; } | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<{ metric: string; currentTarget: number; lastWeek: number;} | null>(null);
   const [newGoalValue, setNewGoalValue] = useState("");
 
   /**
@@ -184,9 +185,10 @@ const Targets = () => {
         <TouchableOpacity
           key={metric}
           onPress={() => {
-            setSelectedGoal({ metric, currentTarget: target });
+            setSelectedGoal({ metric, currentTarget: target, lastWeek: weekly });
             setNewGoalValue(target.toString());
             setIsModalVisible(true);
+            logClick("click", `${metric} progressbox`)
           }}
         >
           <ProgressBox target={target} metric={metric.replace("_", " ")} progressBar={false} weeklyAverage={weekly} />
@@ -198,6 +200,7 @@ const Targets = () => {
         isVisible={isModalVisible}
         goal={Number(newGoalValue)}
         metric={selectedGoal?.metric || ""}
+        average={selectedGoal?.lastWeek || -1}
         onClose={() => setIsModalVisible(false)}
         onSave={(newGoal) => {
           handleSaveNewGoal(newGoal); 

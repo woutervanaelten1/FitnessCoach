@@ -3,6 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import CustomButton from './CustomButton';
 import ChatBubble from './ChatBubble';
 import { router } from 'expo-router';
+import Markdown from "react-native-markdown-display";
+
 
 // Define types for detail content
 interface Detail {
@@ -40,7 +42,7 @@ const DetailView: React.FC<{ detail: Detail }> = ({ detail }) => {
                 <View>
                     <Text style={styles.title}>{detail.type.charAt(0).toUpperCase() + detail.type.slice(1)}</Text>
                     <View style={styles.contentContainer}>
-                        <Text style={styles.contentText}>{detail.content}</Text>
+                        <Markdown style={{body: styles.contentText}}>{detail.content}</Markdown>
                     </View>
                 </View>
             )}

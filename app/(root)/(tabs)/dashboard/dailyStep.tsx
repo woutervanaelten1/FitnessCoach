@@ -2,12 +2,11 @@ import CustomHeader from "@/components/CustomHeader";
 import FullCircle from "@/components/FullCircle";
 import config from "@/config";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Image } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { icons } from "@/constants";
 import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
+import DatePicker from "@/components/DatePicker";
 
 /**
  * Represents an hourly step data entry.
@@ -28,7 +27,6 @@ const DailyStep = () => {
     const [stepGoal, setStepGoal] = useState(0);
     const [processedStepData, setProcessedStepData] = useState<StepEntry[]>([]);
     const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
-    const [isDatePickerOpen, setDatePickerOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
     const { userId } = useProfile();
@@ -156,6 +154,8 @@ const DailyStep = () => {
                 loadingText="Loading your step data..."
                 errorText="Failed to load your step data. Do you want to try again?"
                 headerTitle="Targets & Progress"
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
             />
         );
     }
@@ -165,54 +165,14 @@ const DailyStep = () => {
             <CustomHeader title="Hourly step overview" showBackButton={true} />
 
             {/* Date Selection */}
-            <View className="flex-row justify-between items-center mt-4">
-                <TouchableOpacity
-                    className="bg-gray-200 rounded-full p-2"
-                    onPress={() => changeDate(-1)}
-                >
-                    <Image
-                        source={icons.backArrow}
-                        resizeMode="contain"
-                        className="w-7 h-7"
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    className="bg-blue-500 py-2 px-4 rounded-lg"
-                    onPress={() => setDatePickerOpen(true)}
-                >
-                    <Text className="text-white font-bold">{selectedDate.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    className="bg-gray-200 rounded-full p-2"
-                    onPress={() => changeDate(1)}
-                >
-                    <Image
-                        source={icons.forward}
-                        resizeMode="contain"
-                        className="w-7 h-7"
-                    />
-                </TouchableOpacity>
-            </View>
-
-            {isDatePickerOpen && (
-                <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, date) => {
-                        setDatePickerOpen(false);
-                        if (date) setSelectedDate(date);
-                    }}
-                />
-            )}
+            <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate}/>
 
             {/* Step Progress */}
             <View className="flex-1 items-center justify-center">
                 <View className="flex-row justify-between items-center mb-4 mt-4 w-1/2">
-                    <View className="flex-1 items-center justify-center bg-gray-100 rounded-lg p-4 mx-1 py-8">
+                    <View className="flex-1 items-center justify-center bg-gray-100 rounded-lg p-4 mx-1 pt-8">
                         <FullCircle goal={stepGoal} value={steps} />
+                        <Text className="text-blue-500 font-bold mt-4 text-lg">{steps} Steps</Text>
                     </View>
                 </View>
             </View>

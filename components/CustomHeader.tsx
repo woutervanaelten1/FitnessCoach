@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { icons } from "@/constants";
 import { useRouter } from "expo-router";
+import { logClick } from "@/utils/clickLogger";
 
 /**
  * CustomHeader Component
@@ -30,7 +31,12 @@ const CustomHeader: React.FC<{ title: string; showBackButton?: boolean; rightBut
     <View style={styles.container}>
       {/* Back Button */}
       {showBackButton ? (
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton} accessibilityLabel="Go back">
+        <TouchableOpacity onPress={() => {
+          logClick("click", "Back button");
+          handleBackPress();
+        }}
+          style={styles.backButton}
+          accessibilityLabel="Go back">
           <Image source={icons.backArrow} resizeMode="contain" style={styles.backIcon} />
         </TouchableOpacity>
       ) : (

@@ -1,7 +1,9 @@
 import ChatBubble from "@/components/ChatBubble";
+import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
 import { icons } from "@/constants";
+import { logClick } from "@/utils/clickLogger";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -142,6 +144,7 @@ const Chat = () => {
                 rightButton={
                     <TouchableOpacity className="bg-blue-500 rounded-full px-2 py-1"
                         onPress={() => {
+                            logClick("click", "ChatScreen.NewChatButton");
                             setMessages([]);
                             setConversationId(null);
                         }}
@@ -186,9 +189,11 @@ const Chat = () => {
                             }}>
                             <View className="bg-gray-200 p-3 rounded-lg items-center">
                                 <Text className="text-base">Failed to send message. Do you want to try again?</Text>
-                                <TouchableOpacity onPress={handleRetry} className="mt-2 bg-blue-500 px-4 py-2 rounded-lg w-1/2">
-                                    <Text className="text-white font-bold text-center text-base">Retry</Text>
-                                </TouchableOpacity>
+                                <CustomButton
+                                    title="Retry"
+                                    onPress={handleRetry}
+                                    className="mt-2 px-4 py-2 rounded-lg w-1/2"
+                                />
                             </View>
                         </View>
                     )}
@@ -213,7 +218,10 @@ const Chat = () => {
                         />
                         <TouchableOpacity
                             className="ml-3 bg-blue-500 rounded-full px-4 py-2 justify-center items-center"
-                            onPress={() => handleSendMessage(input)}
+                            onPress={() => {
+                                logClick("click", "Send message");
+                                handleSendMessage(input);
+                              }}
                         >
                             <Image source={icons.plane} tintColor="#fff" resizeMode="contain" className="w-5 h-5" />
                         </TouchableOpacity>

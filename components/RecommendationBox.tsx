@@ -1,4 +1,5 @@
 import { icons } from "@/constants";
+import { logClick } from "@/utils/clickLogger";
 import { TouchableOpacity } from "react-native";
 import { Image, Text, View } from "react-native";
 
@@ -41,14 +42,17 @@ const RecommendationBox = ({ recommendation, metric, onOpenModal }: { recommenda
     const icon = metricIcons[metric] || icons.heart;
 
     return (
-        <TouchableOpacity onPress={() => onOpenModal({ recommendation, metric, reason: "", benefit: "", based_on: "" })}>
+        <TouchableOpacity onPress={() => {
+            logClick("click", `Recommendationbox [metric: ${metric}, recommendation: ${recommendation}]`);
+            onOpenModal({ recommendation, metric, reason: "", benefit: "", based_on: "" });
+        }}>
             <View className="flex-row items-center bg-gray-100 p-4 rounded-lg my-1">
                 {/* Display relevant icon for the metric */}
                 <Image source={icon} tintColor="#307FE2" className="w-10 h-10" />
 
                 {/* Display recommendation text */}
                 <View className="flex-1 ml-4">
-                    <Text className="text-lg font-bold text-blue-500">{recommendation}</Text>
+                    <Text className="text-base font-bold text-blue-500">{recommendation}</Text>
                 </View>
             </View>
         </TouchableOpacity>

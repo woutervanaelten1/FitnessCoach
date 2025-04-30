@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import CustomHeader from './CustomHeader';
 import CustomButton from './CustomButton';
+import DatePicker from './DatePicker';
+import config from "@/config";
 
 /**
  * LoadingErrorView Component
@@ -20,14 +22,18 @@ const LoadingErrorView = ({
   onRetry,
   loadingText = "Loading...",
   errorText = "Failed to load. Do you want to try again?",
-  headerTitle = "Fitness Coach"
+  headerTitle = "Fitness Coach",
+  selectedDate,
+  setSelectedDate,
 }: {
   isLoading: boolean,
   hasError: boolean,
   onRetry: () => void,
   loadingText: string,
   errorText: string,
-  headerTitle: string
+  headerTitle: string,
+  selectedDate?: Date,
+  setSelectedDate?: (date: Date) => void,
 }) => {
   // Show loading state
   if (isLoading) {
@@ -47,6 +53,14 @@ const LoadingErrorView = ({
     return (
       <View className="flex-1 bg-white">
         <CustomHeader title={headerTitle} showBackButton={false} />
+        {selectedDate && setSelectedDate && (
+          <View className='justify-center px-4'>
+            <DatePicker
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
+          </View>
+        )}
         <View className="flex-1 justify-center items-center">
           <Text className="text-red-500 text-lg font-bold mb-4">{errorText}</Text>
           <CustomButton title="Retry" onPress={onRetry} className="py-3 px-6 w-1/2" />

@@ -1,6 +1,7 @@
 import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import DatePicker from "@/components/DatePicker";
 import DetailView from "@/components/DetailComponent";
 import IconTextBox from "@/components/IconTextBox";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -16,7 +17,7 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } fro
 type SleepEntry = {
   day: string;
   hours: number;
-  isFixedDate?: boolean;
+  date?: Date;
 };
 
 /**
@@ -36,11 +37,8 @@ const SleepDetail = () => {
   const [detailLoading, setDetailLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
 
-  const fixedDate = new Date(config.FIXED_DATE);
-  const yesterday = new Date(fixedDate);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const formattedYesterday = yesterday.toISOString().split('T')[0];
   const { userId } = useProfile();
 
   /**
@@ -103,6 +101,11 @@ const SleepDetail = () => {
     };
 
   /**
+  * Formats selectedDate to match API and dataset format (YYYY-MM-DD).
+  */
+  const getFormattedDate = (date: Date) => date.toISOString().split("T")[0];
+
+  /**
    * Fetches sleep data, including daily sleep summary, weekly trends, and goals.
    */
   const fetchData = async () => {
@@ -110,9 +113,11 @@ const SleepDetail = () => {
       setIsLoading(true);
       setHasError(false);
 
-
+      const yesterday = new Date(selectedDate);
+      yesterday.setDate(selectedDate.getDate() - 1);
+      const formattedYesterday = getFormattedDate(yesterday);
       const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/sleep_summary/by-date?date=${formattedYesterday}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/sleep_data/by-date?date=${formattedYesterday}&user_id=${userId}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${formattedYesterday}&user_id=${userId}`),
         fetch(`${config.API_BASE_URL}/data/goals/${userId}/sleep`)
       ]);
@@ -148,7 +153,7 @@ const SleepDetail = () => {
           return {
             day: new Intl.DateTimeFormat("en-US", options).format(date),
             hours: parseFloat((item.total_sleep_minutes / 60).toFixed(2)),
-            isFixedDate: date.toDateString() === fixedDate.toDateString(),
+            date: getFormattedDate(date)
           };
         });
         setSleepData(processedSleepData);
@@ -171,6 +176,9 @@ const SleepDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
+      const yesterday = new Date(selectedDate);
+      yesterday.setDate(selectedDate.getDate() - 1);
+      const formattedYesterday = getFormattedDate(yesterday);
       const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedYesterday}&metric=sleep&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
@@ -187,7 +195,7 @@ const SleepDetail = () => {
   useEffect(() => {
     fetchData();
     fetchDetail();
-  }, [userId]);
+  }, [userId, selectedDate]);
 
   if (isLoading || hasError) {
     return (
@@ -209,6 +217,8 @@ const SleepDetail = () => {
         title="Sleep overview"
         showBackButton={true}
       />
+
+      <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
       {/* Sleep Summary */}
       <View className="flex-row justify-between mb-4 mt-4">
@@ -275,7 +285,7 @@ const SleepDetail = () => {
           <VictoryBar barWidth={20} cornerRadius={{ top: 3 }} data={sleepData} x="day" y="hours"
             style={{
               data: {
-                fill: ({ datum }) => (datum.isFixedDate ? "#ff4d4d" : "#4A90E2"),
+                fill: ({ datum }) => (getFormattedDate(new Date(selectedDate.getTime()-86400000)) === datum.date ? "#ff4d4d" : "#4A90E2"),
               },
             }}
             labels={({ datum }) => datum.hours}

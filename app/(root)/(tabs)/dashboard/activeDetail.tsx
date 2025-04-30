@@ -1,6 +1,7 @@
 import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import DatePicker from "@/components/DatePicker";
 import DetailView from "@/components/DetailComponent";
 import IconBoxMultiIcon from "@/components/IconBoxMultiIcon";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -29,6 +30,7 @@ const ActivityDetail = () => {
   const [detailLoading, setDetailLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
   const { userId } = useProfile();
 
   /**
@@ -60,8 +62,9 @@ const ActivityDetail = () => {
     try {
       setIsLoading(true);
       setHasError(false);
+      const formattedDate = selectedDate.toISOString().split("T")[0];
       const [activityResponse, goalResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_activity/by-date?date=${formattedDate}&user_id=${userId}`),
         fetch(`${config.API_BASE_URL}/data/goals/${userId}/active_minutes`)
       ]);
 
@@ -102,7 +105,8 @@ const ActivityDetail = () => {
   const fetchDetail = async () => {
     try {
       setDetailLoading(true);
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=activity&user_id=${userId}`);
+      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedDate}&metric=activity&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();
@@ -118,7 +122,7 @@ const ActivityDetail = () => {
   useEffect(() => {
     fetchData();
     fetchDetail();
-  }, [userId]);
+  }, [userId, selectedDate]);
 
   if (isLoading || hasError) {
     return (
@@ -129,6 +133,8 @@ const ActivityDetail = () => {
         loadingText="Loading your activity data..."
         errorText="Failed to load your activity data. Do you want to try again?"
         headerTitle="Targets & Progress"
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
       />
     );
   }
@@ -139,6 +145,7 @@ const ActivityDetail = () => {
         title="Activity overview"
         showBackButton={true}
       />
+      <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
       <View className="flex-row justify-between mb-4 mt-4">
         <IconBoxMultiIcon amount={1} icon={icons.bolt} bottomText={lightlyActive.toLocaleString()} topText="Lightly active minutes" />

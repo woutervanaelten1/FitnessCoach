@@ -2,6 +2,7 @@ import { Tabs, usePathname } from "expo-router";
 import { View, Image, ImageSourcePropType, SafeAreaView } from "react-native";
 import { icons } from "@/constants";
 import { useEffect, useRef } from "react";
+import { logClick } from "@/utils/clickLogger";
 
 /**
  * Tab icon component for the bottom navigation.
@@ -28,29 +29,23 @@ const Layout = () => {
     const lastScreen = useRef<string | null>(null);
     const startTime = useRef<number | null>(null);
   
-    // useEffect(() => {
-    //   const now = Date.now();
+    useEffect(() => {
+      const now = Date.now();
   
-    //   if (lastScreen.current && startTime.current) {
-    //     const timeSpent = now - startTime.current;
-    //     console.log(`User spent ${timeSpent}ms on ${lastScreen.current}`);
+      if (lastScreen.current && startTime.current) {
+        const timeSpent = now - startTime.current;
         
-    //     // Send data to FastAPI backend (optional)
-    //     fetch("TODO-make-endpoint", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify({
-    //         eventType: "screen_time",
-    //         screen: lastScreen.current,
-    //         duration: timeSpent,
-    //       }),
-    //     }).catch((error) => console.error("Error sending time spent data:", error));
-    //   }
+        logClick(
+          "screen_time",
+          `From ${lastScreen.current} ==> ${pathname} (${timeSpent}ms)`
+        );
+        
+      }
   
-    //   // Update the current screen and start time
-    //   lastScreen.current = pathname;
-    //   startTime.current = now;
-    // }, [pathname]);
+      // Update the current screen and start time
+      lastScreen.current = pathname;
+      startTime.current = now;
+    }, [pathname]);
 
     /**
      * Determines if a tab should be highlighted based on the current path.

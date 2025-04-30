@@ -1,6 +1,7 @@
 import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import DatePicker from "@/components/DatePicker";
 import IconTextBox from "@/components/IconTextBox";
 import InputModal from "@/components/inputModal";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -36,6 +37,7 @@ const WeightDetail = () => {
     const [hasError, setHasError] = useState(false);
     const [isGoalEditModalVisible, setIsGoalEditModalVisible] = useState(false);
     const [isInputModalVisible, setIsInputModalVisible] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
     const { userId } = useProfile();
 
     /**
@@ -85,9 +87,10 @@ const WeightDetail = () => {
         try {
             setIsLoading(true);
             setHasError(false);
+            const formattedDate = selectedDate.toISOString().split("T")[0];
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
-                fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${formattedDate}&user_id=${userId}`),
                 fetch(`${config.API_BASE_URL}/data/goals/${userId}/weight`)
             ]);
 
@@ -106,7 +109,6 @@ const WeightDetail = () => {
 
             // Set current weight
             const todayData = todayDataArray.length > 0 ? todayDataArray[0] : null;
-            console.log(todayData);
             if (todayData) {
                 setCurrentWeight(todayData.weightkg);
             }
@@ -120,7 +122,7 @@ const WeightDetail = () => {
                         const options: Intl.DateTimeFormatOptions = { weekday: "short" };
                         return {
                             day: new Intl.DateTimeFormat("en-US", options).format(date),
-                            weight: parseFloat(item.weightkg.toFixed(2)),
+                            weight: parseFloat((item.weightkg ?? 0).toFixed(2)),
                             isFixedDate: date.toDateString() === fixedDate.toDateString(),
                         };
                     }
@@ -142,7 +144,7 @@ const WeightDetail = () => {
 
     useEffect(() => {
         fetchData();
-    }, [userId]);
+    }, [userId, selectedDate]);
 
     if (isLoading || hasError) {
         return (
@@ -153,6 +155,8 @@ const WeightDetail = () => {
                 loadingText="Loading your weight data..."
                 errorText="Failed to load your weight data. Do you want to try again?"
                 headerTitle="Targets & Progress"
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
             />
         );
     }
@@ -161,7 +165,7 @@ const WeightDetail = () => {
         try {
             // POST for new goal
             const response = await fetch(
-                `${config.API_BASE_URL}/data/goals/${config.USER_ID}/weight?goal_value=${Number(inputTarget)}`,
+                `${config.API_BASE_URL}/data/goals/${userId}/weight?goal_value=${Number(inputTarget)}`,
                 {
                     method: "POST",
                     headers: { "accept": "application/json" },
@@ -208,7 +212,7 @@ const WeightDetail = () => {
             };
 
             // Construct the endpoint URL with query parameters
-            const endpointUrl = `${config.API_BASE_URL}/data/weight_log/update_weight/${config.USER_ID}?date=${config.FIXED_DATE}&weight=${weight}`;
+            const endpointUrl = `${config.API_BASE_URL}/data/weight_log/update_weight/${userId}?date=${config.FIXED_DATE}&weight=${weight}`;
 
             // Send POST request to update the weight log entry
             const response = await fetch(endpointUrl, {
@@ -268,6 +272,8 @@ const WeightDetail = () => {
     return (
         <ScrollView className="flex-1 px-4 bg-white">
             <CustomHeader title="Weight overview" showBackButton={true} />
+
+            <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
             {/* Current & Target Weight */}
             <View className="flex-row justify-between mb-2 mt-4">

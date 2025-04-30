@@ -1,6 +1,7 @@
 import { useProfile } from "@/app/context/ProfileContext";
 import CustomButton from "@/components/CustomButton";
 import CustomHeader from "@/components/CustomHeader";
+import DatePicker from "@/components/DatePicker";
 import DetailView from "@/components/DetailComponent";
 import IconTextBox from "@/components/IconTextBox";
 import LoadingErrorView from "@/components/LoadingErrorView";
@@ -37,6 +38,7 @@ const StepDetail = () => {
     const [detailLoading, setDetailLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [detail, setDetail] = useState<{ type: string; content: string } | null>(null);
+    const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
     const { userId } = useProfile();
 
     /**
@@ -91,9 +93,10 @@ const StepDetail = () => {
         try {
             setIsLoading(true);
             setHasError(false);
+            const formattedDate = selectedDate.toISOString().split("T")[0];
             const [todayResponse, weeklyResponse, goalResponse] = await Promise.all([
-                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
-                fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}&user_id=${userId}`),
+                fetch(`${config.API_BASE_URL}/data/daily_data/week-back?date=${formattedDate}&user_id=${userId}`),
                 fetch(`${config.API_BASE_URL}/data/goals/${userId}/steps`)
             ]);
 
@@ -153,7 +156,8 @@ const StepDetail = () => {
     const fetchDetail = async () => {
         try {
             setDetailLoading(true);
-            const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${config.FIXED_DATE}&metric=steps&user_id=${userId}`);
+            const formattedDate = selectedDate.toISOString().split("T")[0];
+            const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedDate}&metric=steps&user_id=${userId}`);
             if (!response.ok) throw new Error("Failed to fetch detail");
 
             const data = await response.json();
@@ -169,7 +173,7 @@ const StepDetail = () => {
     useEffect(() => {
         fetchData();
         fetchDetail();
-    }, [userId]);
+    }, [userId, selectedDate]);
 
 
     if (isLoading || hasError) {
@@ -181,6 +185,8 @@ const StepDetail = () => {
                 loadingText="Loading your step data..."
                 errorText="Failed to load your step data. Do you want to try again?"
                 headerTitle="Targets & Progress"
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
             />
         );
     }
@@ -188,7 +194,7 @@ const StepDetail = () => {
     return (
         <ScrollView className="flex-1 px-4 bg-white">
             <CustomHeader title="Steps overview" showBackButton={true} />
-
+            <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate}/>
             {/* Step Summary */}
             <View className="flex-row justify-between mb-4 mt-4">
                 <IconTextBox icon={icons.walking} topText={steps.toLocaleString()} bottomText="Steps" />
@@ -269,7 +275,7 @@ const StepDetail = () => {
                 </VictoryChart>
             </View>
 
-            <CustomButton title="Daily step breakdown" onPress={() => router.push("/dashboard/dailyStep")} />
+            <CustomButton className="mb-3" title="Daily step breakdown" onPress={() => router.push("/dashboard/dailyStep")} />
         </ScrollView>
     );
 };

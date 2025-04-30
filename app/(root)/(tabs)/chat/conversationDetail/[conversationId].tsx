@@ -1,6 +1,7 @@
 import ChatBubble from "@/components/ChatBubble";
 import CustomHeader from "@/components/CustomHeader";
 import config from "@/config";
+import { logClick } from "@/utils/clickLogger";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
@@ -60,12 +61,15 @@ const ConversationDetailsScreen = () => {
             <CustomHeader title="Fitness coach" showBackButton={true}
                 rightButton={
                     <TouchableOpacity className="bg-blue-500 rounded-full px-2 py-1"
-                        onPress={() => router.push("../chat")}
+                        onPress={() => {
+                            logClick("click", "New chat in taskbar");
+                            router.push("../chat");
+                        }}
                     >
                         <Text className="text-white font-bold">New Chat</Text>
                     </TouchableOpacity>
                 } />
-                
+
             {/* Chat messages display */}
             <View className="flex-1 mt-2">
                 {isLoading ? (

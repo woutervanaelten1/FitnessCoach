@@ -4,6 +4,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { ProfileProvider } from "./context/ProfileContext";
+import { logClick } from "../utils/clickLogger";
+
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -21,6 +23,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
+      logClick("session_start", "AppLayout");
       SplashScreen.hideAsync();
     }
   }, [loaded]);

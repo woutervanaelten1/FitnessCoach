@@ -9,6 +9,8 @@ import { VictoryChart, VictoryBar, VictoryAxis, VictoryLabel, VictoryTheme, Vict
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
+import DatePicker from "@/components/DatePicker";
+import { logClick } from "@/utils/clickLogger";
 
 /**
  * Represents a weekly sleep data entry.
@@ -16,7 +18,7 @@ import { useProfile } from "@/app/context/ProfileContext";
 type SleepEntry = {
   day: string;
   hours: number;
-  isFixedDate?: boolean;
+  date: Date;
 };
 
 /**
@@ -59,13 +61,10 @@ const Dashboard = () => {
   const [currentWeight, setCurrentWeight] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date(config.FIXED_DATE));
   const { userId } = useProfile();
 
   const timeLabels = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00", "24:00"];
-  const fixedDate = new Date(config.FIXED_DATE);
-  const yesterday = new Date(fixedDate);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const formattedYesterday = yesterday.toISOString().split('T')[0];
 
   /**
    * Custom theme settings for the Victory Bar Chart.
@@ -143,17 +142,26 @@ const Dashboard = () => {
   };
 
   /**
+   * Formats selectedDate to match API and dataset format (YYYY-MM-DD).
+  */
+  const getFormattedDate = (date: Date) => date.toISOString().split("T")[0];
+
+  /**
    * Fetches dashboard data including steps, calories, active minutes, sleep, heart rate, and weight.
    */
   const fetchData = async () => {
     try {
       setIsLoading(true);
       setHasError(false);
+      const formattedDate = getFormattedDate(selectedDate);
+      const yesterday = new Date(selectedDate);
+      yesterday.setDate(selectedDate.getDate() - 1);
+      const formattedYesterday = getFormattedDate(yesterday);
       const [todayResponse, sleepResponse, heartRateResponse, weightResponse] = await Promise.all([
-        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/daily_data/by-date?date=${formattedDate}&user_id=${userId}`),
         fetch(`${config.API_BASE_URL}/data/daily_data/sleep-week-back?date=${formattedYesterday}&user_id=${userId}`),
-        fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${config.FIXED_DATE}&user_id=${userId}`),
-        fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${config.FIXED_DATE}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/heartrate/minute?bydate=${formattedDate}&user_id=${userId}`),
+        fetch(`${config.API_BASE_URL}/data/weight_log/week-back?date=${formattedDate}&user_id=${userId}`),
       ]);
 
       if (!todayResponse.ok || !sleepResponse.ok || !heartRateResponse.ok || !weightResponse.ok) {
@@ -182,6 +190,7 @@ const Dashboard = () => {
           return {
             day: new Intl.DateTimeFormat("en-US", options).format(date),
             hours: parseFloat((item.total_sleep_minutes / 60).toFixed(2)),
+            date: getFormattedDate(date)
           };
         });
         setSleepData(processedSleepData);
@@ -255,7 +264,7 @@ const Dashboard = () => {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [userId])
+    }, [userId, selectedDate])
   );
 
 
@@ -268,6 +277,8 @@ const Dashboard = () => {
         loadingText="Loading your data..."
         errorText="Failed to load your data. Do you want to try again?"
         headerTitle="Fitness Dashboard"
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
       />
     );
   }
@@ -277,20 +288,29 @@ const Dashboard = () => {
       <CustomHeader title="Fitness Dashboard" showBackButton={false} />
 
       {/* Date Section */}
-      <Text className="text-black text-xl font-bold mb-1 mt-2">{config.FIXED_DATE}</Text>
+      <DatePicker selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       <Text className="text-blue-500 font-semibold text-sm mb-4">Touch one of the icons for more information</Text>
 
       {/* Overview Metrics */}
       <View className="flex-row justify-between mb-4 mt-4">
-        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/calorieDetail")}>
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => {
+          logClick("click", "Dashboard.CalorieBox");
+          router.push("/dashboard/calorieDetail");
+        }}>
           <IconTextBox icon={icons.fire} topText={calories.toLocaleString()} bottomText="kcal" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/stepDetail")}>
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => {
+          logClick("click", "Dashboard.StepBox");
+          router.push("/dashboard/stepDetail");
+        }}>
           <IconTextBox icon={icons.walking} topText={steps.toLocaleString()} bottomText="steps" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push("/dashboard/activeDetail")}>
+        <TouchableOpacity style={{ flex: 1 }} onPress={() => {
+          logClick("click", "Dashboard.ActivityBoxX");
+          router.push("/dashboard/activeDetail");
+        }}>
           <IconTextBox icon={icons.timer} topText={activeMinutes.toLocaleString()} bottomText="minutes" />
         </TouchableOpacity>
       </View>
@@ -298,7 +318,10 @@ const Dashboard = () => {
       {/* Sleep Duration Section */}
       <Text className="text-black text-lg font-semibold mb-1">Sleep duration last week (hours)</Text>
       <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
-      <TouchableOpacity className="relative z-10" onPress={() => { router.push("/dashboard/sleepDetail"); }}>
+      <TouchableOpacity className="relative z-10" onPress={() => {
+        logClick("click", "Dashboard.SleepBox");
+        router.push("/dashboard/sleepDetail");
+      }}>
         <View pointerEvents="none" className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
           <VictoryChart height={224} theme={customThemeBarChart} >
             <VictoryAxis
@@ -311,7 +334,7 @@ const Dashboard = () => {
             <VictoryBar barWidth={20} cornerRadius={{ top: 3 }} data={sleepData} x="day" y="hours"
               style={{
                 data: {
-                  fill: ({ datum }) => (datum.isFixedDate ? "#ff4d4d" : "#4A90E2"),
+                  fill: ({ datum }) => (getFormattedDate(new Date(selectedDate.getTime() - 86400000)) === datum.date ? "#ff4d4d" : "#4A90E2"),
                 },
               }}
               labels={({ datum }) => datum.hours}
@@ -348,54 +371,54 @@ const Dashboard = () => {
       <View>
         <Text className="text-black text-lg font-semibold mb-1">Weight journey (in kgs)</Text>
         <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)}kg</Text></Text>
-        <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more sleep information</Text>
+        <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more weight information</Text>
         <TouchableOpacity className="relative z-10" onPress={() => { router.push("/dashboard/weightDetail"); }}>
-        {weightData.length > 0 ? (
-          <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-            <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
-              <VictoryAxis
-                tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
-                style={customThemeLineChart.axisBottom.style}
-              />
-              <VictoryAxis
-                dependentAxis
-                tickFormat={(t) => `${t}`}
-                style={customThemeLineChart.axisLeft.style}
-              />
-              <VictoryArea
-                data={weightData}
-                x="day"
-                y="weight"
-                interpolation="monotoneX"
-                style={customThemeLineChart.area.style}
-              />
-              {weightData.length > 0 && (
-                <VictoryScatter
-                  data={[weightData[weightData.length - 1]]} // Last data point (today)
+          {weightData.length > 0 ? (
+            <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+              <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
+                <VictoryAxis
+                  tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
+                  style={customThemeLineChart.axisBottom.style}
+                />
+                <VictoryAxis
+                  dependentAxis
+                  tickFormat={(t) => `${t}`}
+                  style={customThemeLineChart.axisLeft.style}
+                />
+                <VictoryArea
+                  data={weightData}
                   x="day"
                   y="weight"
-                  size={3}
-                  style={{ data: { fill: "#307FE2" } }}
-                  labels={({ datum }) => `${datum.weight} kg`}
-                  labelComponent={
-                    <VictoryLabel
-                      dy={-12}
-                      style={{ fontSize: 12, fill: "#307FE2" }}
-                    />
-                  }
+                  interpolation="monotoneX"
+                  style={customThemeLineChart.area.style}
                 />
-              )}
-            </VictoryChart>
-          </View>
-        ) : (
-          <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-            <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
-          </View>
+                {weightData.length > 0 && (
+                  <VictoryScatter
+                    data={[weightData[weightData.length - 1]]} // Last data point (today)
+                    x="day"
+                    y="weight"
+                    size={3}
+                    style={{ data: { fill: "#307FE2" } }}
+                    labels={({ datum }) => `${datum.weight} kg`}
+                    labelComponent={
+                      <VictoryLabel
+                        dy={-12}
+                        style={{ fontSize: 12, fill: "#307FE2" }}
+                      />
+                    }
+                  />
+                )}
+              </VictoryChart>
+            </View>
+          ) : (
+            <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+              <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
+            </View>
 
-        )}
+          )}
         </TouchableOpacity>
       </View>
-      
+
     </ScrollView>
   );
 };
