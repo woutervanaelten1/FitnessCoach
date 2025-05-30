@@ -106,7 +106,7 @@ const ActivityDetail = () => {
     try {
       setDetailLoading(true);
       const formattedDate = selectedDate.toISOString().split("T")[0];
-      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedDate}&metric=activity&user_id=${userId}`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/detail?date=${formattedDate}&metric=active_minutes&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch detail");
 
       const data = await response.json();

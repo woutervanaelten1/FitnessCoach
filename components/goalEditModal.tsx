@@ -44,7 +44,7 @@ const GoalEditModal = ({
         setFetchError(false);
         try {
             const response = await fetch(
-                `${config.API_BASE_URL}/chat/new_goal?date=${config.FIXED_DATE}&metric=${metric}&current_goal=${goal}&user_id=${userId}&average=${average}`
+                `${config.API_BASE_URL}/chat/new_goal?date=${config.FIXED_DATE}&metric=${metric}&current_goal=${goal}&user_id=${userId}&average=${encodeURIComponent(average)}`
             );
             if (!response.ok) throw new Error("Failed to fetch data");
 
