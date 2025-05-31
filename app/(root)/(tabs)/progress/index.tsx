@@ -20,7 +20,7 @@ const Targets = () => {
   const [calories, setCalories] = useState(0);
   const [activeMinutes, setActiveMinutes] = useState(0);
   const [sleep, setSleep] = useState(0);
-  
+
   // States for weekly averages
   const [weeklySteps, setWeeklySteps] = useState(0);
   const [weeklyCalories, setWeeklyCalories] = useState(0);
@@ -39,7 +39,11 @@ const Targets = () => {
   const { userId } = useProfile();
 
   /**
-   * Fetches the user's progress data, weekly averages, and goals.
+   * Calculates the average value of a specified field across a week.
+   *
+   * @param {Array<any>} data - Array of daily entries.
+   * @param {string} field - Key of the metric to average (e.g., 'totalsteps').
+   * @returns {number} The weekly average for that metric.
    */
   const fetchData = async () => {
     try {

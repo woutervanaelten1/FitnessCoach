@@ -3,18 +3,19 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import CustomHeader from './CustomHeader';
 import CustomButton from './CustomButton';
 import DatePicker from './DatePicker';
-import config from "@/config";
 
 /**
  * LoadingErrorView Component
  * A reusable component to handle loading and error states in the app.
  * 
- * @param {boolean} isLoading - Determines if data is still loading.
- * @param {boolean} hasError - Indicates if an error occurred during data fetching.
- * @param {() => void} onRetry - Function to retry loading the data.
- * @param {string} loadingText - Customizable text displayed while loading.
- * @param {string} errorText - Customizable error message when data fails to load.
- * @param {string} headerTitle - Title displayed in the CustomHeader.
+ * @param {boolean} isLoading - Determines if data is currently loading.
+ * @param {boolean} hasError - Indicates whether an error occurred during data fetching.
+ * @param {() => void} onRetry - Callback function to retry loading data.
+ * @param {string} loadingText - Text displayed while loading. Defaults to "Loading...".
+ * @param {string} errorText - Text displayed on error. Defaults to "Failed to load. Do you want to try again?".
+ * @param {string} headerTitle - Title shown in the header. Defaults to "Fitness Coach".
+ * @param {Date} [selectedDate] - Optional date value to display a DatePicker during error state.
+ * @param {(date: Date) => void} [setSelectedDate] - Optional callback to update selectedDate.
  */
 const LoadingErrorView = ({
   isLoading,

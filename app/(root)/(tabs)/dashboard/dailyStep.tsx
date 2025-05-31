@@ -9,7 +9,9 @@ import { useProfile } from "@/app/context/ProfileContext";
 import DatePicker from "@/components/DatePicker";
 
 /**
- * Represents an hourly step data entry.
+ * Represents the total number of steps taken in a specific hour of the day.
+ * @property time - The hour of the day (0–23).
+ * @property steps - Total steps recorded in that hour.
  */
 type StepEntry = {
     time: number;
@@ -75,6 +77,7 @@ const DailyStep = () => {
 
     /**
      * Fetches step data for a given date, including hourly steps and step goals.
+     * 
      *
      * @param {Date} date - The selected date.
      */

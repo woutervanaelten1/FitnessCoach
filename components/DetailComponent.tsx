@@ -6,7 +6,11 @@ import { router } from 'expo-router';
 import Markdown from "react-native-markdown-display";
 
 
-// Define types for detail content
+/**
+ * Represents a detail item to display in the view.
+ * @property type - The type of detail ("question", "advice", or "insight").
+ * @property content - The textual content or question related to the metric.
+ */
 interface Detail {
     type: "question" | "advice" | "insight";
     content: string;

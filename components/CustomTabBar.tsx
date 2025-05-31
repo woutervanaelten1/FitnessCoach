@@ -3,6 +3,11 @@ import { View, TouchableOpacity, Image, Text } from "react-native";
 import { useSegments, useRouter } from "expo-router";
 import { icons } from "@/constants";
 
+/**
+ * Configuration for the custom tab bar.
+ * Contains the route name, icon, and label for each tab.
+ */
+
 const tabs: { name: "home" | "dashboard" | "chat" | "progress" | "profile"; icon: any; label: string }[] = [
   { name: "home", icon: icons.home, label: "Home" },
   { name: "dashboard", icon: icons.graph, label: "Dashboard" },
@@ -11,6 +16,12 @@ const tabs: { name: "home" | "dashboard" | "chat" | "progress" | "profile"; icon
   { name: "profile", icon: icons.profile, label: "Profile" },
 ];
 
+/**
+ * CustomTabBar Component
+ * A bottom navigation bar replacement for manual routing between core app sections.
+ * 
+ * Highlights the active tab based on the current route.
+ */
 const CustomTabBar = () => {
   const segments = useSegments() as string[]; 
   const router = useRouter();

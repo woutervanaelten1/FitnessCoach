@@ -3,16 +3,15 @@ import React, { useState, useEffect } from "react";
 import CustomButton from "./CustomButton";
 
 /**
- * InputModal Component
- * A modal that allows users to input a numeric value and save it (new weight, ).
- *
- * @param {boolean} isVisible - Controls the modal's visibility.
- * @param {string} title - The title displayed at the top of the modal.
- * @param {string} subtitle - A short description or instruction for the input field.
- * @param {number} placeholder - The default numeric value shown when the modal opens.
- * @param {string} inputPlaceholder - A hint for the user input field.
- * @param {() => void} onClose - Function to close the modal without saving.
- * @param {(inputValue: number) => void} onSave - Function triggered when saving the input value.
+ * Props for InputModal component.
+ * @typedef InputModalProps
+ * @property {boolean} isVisible - Controls the modal's visibility.
+ * @property {string} title - Title displayed at the top.
+ * @property {string} subtitle - Short description or instruction below the title.
+ * @property {number} placeholder - Default numeric value shown on modal open.
+ * @property {string} inputPlaceholder - Placeholder text in the input field.
+ * @property {() => void} onClose - Callback to close modal without saving.
+ * @property {(inputValue: number) => void} onSave - Callback with numeric input on save.
  */
 const InputModal = ({
     isVisible,

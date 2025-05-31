@@ -9,7 +9,10 @@ import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 /**
- * Represents a chat message.
+ * Represents a single chat message.
+ * @property id - Unique identifier for the message (used as React key).
+ * @property text - Content of the message.
+ * @property isUser - True if the message was sent by the user.
  */
 type Message = {
     id: string;
@@ -118,6 +121,8 @@ const Chat = () => {
         }
     };
 
+
+    // Reset state and optionally send pre-filled question when screen gains focus
     useFocusEffect(
         useCallback(() => {
             // Reset state when the chat page becomes active

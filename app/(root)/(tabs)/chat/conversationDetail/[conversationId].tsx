@@ -9,11 +9,16 @@ import { ScrollView, Text, View } from "react-native";
 
 /**
  * Represents a single message in a conversation.
+ * @property conversation_id - ID linking the message to a conversation.
+ * @property user_id - ID of the user who sent the message.
+ * @property role - 'user' or 'assistant', indicating message sender.
+ * @property message - The message text.
+ * @property timestamp - When the message was sent.
  */
 interface Message {
     conversation_id: string;
     user_id: string;
-    role: string;  // "user" or "assistant"
+    role: string; 
     message: string;
     timestamp: string;
 }
@@ -31,11 +36,12 @@ const ConversationDetailsScreen = () => {
     const [messages, setMessages] = useState<Message[]>([]);
 
     /**
-     * Fetches the messages for the given conversation.
+     * Fetch messages for the current conversation ID from the backend API.
+     * Updates local state with the retrieved messages.
      */
     const fetchData = useCallback(async () => {
         try {
-            setIsLoading(true); // Ensure loading state is updated
+            setIsLoading(true);
             const response = await fetch(
                 `${config.API_BASE_URL}/data/conversation_messages/${conversationId}`
             );

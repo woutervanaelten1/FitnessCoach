@@ -14,6 +14,8 @@ import DatePicker from "@/components/DatePicker";
 
 /**
  * Represents the structure of hourly calorie data.
+ * @property time - The hour of the day (0–23).
+ * @property calories - Total calories recorded in that hour.
  */
 type HourlyCalorie = {
   time: number;

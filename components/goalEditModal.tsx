@@ -6,15 +6,14 @@ import { icons } from "@/constants";
 import { useProfile } from "@/app/context/ProfileContext";
 
 /**
- * GoalEditModal Component
- * A modal that allows users to edit their fitness goals. It fetches
- * goal recommendations from the fitness coach and allows manual input.
- *
- * @param {boolean} isVisible - Controls the modal visibility.
- * @param {number} goal - The current goal value.
- * @param {string} metric - The fitness metric being edited (e.g., steps, calories).
- * @param {() => void} onClose - Function to close the modal.
- * @param {(newGoal: number) => void} onSave - Function to save the new goal.
+ * Props for GoalEditModal component.
+ * @typedef GoalEditModalProps
+ * @property {boolean} isVisible - Controls the visibility of the modal.
+ * @property {number} goal - The current goal value.
+ * @property {string} metric - The fitness metric being edited (e.g., steps, calories).
+ * @property {number} average - The average value related to the metric.
+ * @property {() => void} onClose - Callback to close the modal.
+ * @property {(newGoal: number) => void} onSave - Callback to save the new goal.
  */
 
 const GoalEditModal = ({

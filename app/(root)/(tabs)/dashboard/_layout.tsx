@@ -1,4 +1,9 @@
 import { Stack } from 'expo-router';
+/**
+ * Defines the stack navigation for the dashboard section of the app.
+ * Each screen shows detailed information about a specific fitness metric.
+ */
+
 
 export default function DashboardLayout() {
   return (

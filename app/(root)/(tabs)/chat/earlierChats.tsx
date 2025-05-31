@@ -9,7 +9,12 @@ import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 /**
- * Represents a past conversation subject.
+ * Represents the metadata of a past conversation.
+ * @property conversation_id - Unique ID for the conversation.
+ * @property user_id - ID of the user who participated.
+ * @property subject - Short description or topic of the conversation.
+ * @property first_message - The initial message of the conversation.
+ * @property timestamp - When the conversation started.
  */
 interface Subject {
   conversation_id: string;

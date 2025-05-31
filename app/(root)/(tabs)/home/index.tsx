@@ -11,7 +11,14 @@ import RecommendationModal from "@/components/RecommendationModal";
 import { useProfile } from "@/app/context/ProfileContext";
 
 /**
- * Represents a recommendation object.
+ * Represents a recommendation generated for the user.
+ *
+ * @property recommendation - The main advice or suggestion.
+ * @property reason - The reason behind the recommendation.
+ * @property benefit - The expected benefit of following the recommendation.
+ * @property based_on - The data or behavior this recommendation is based on.
+ * @property metric - The metric (e.g., steps, sleep) this relates to.
+ * @property question - A question users can ask the chatbot for more detail.
  */
 interface Recommendation {
   recommendation: string;

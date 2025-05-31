@@ -10,6 +10,12 @@ import { logClick } from "../utils/clickLogger";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+/**
+ * Root layout component that handles font loading, splash screen behavior,
+ * and wraps the application in the profile context provider.
+ *
+ * @returns {JSX.Element | null} The root layout component.
+ */
 export default function RootLayout() {
   const [loaded] = useFonts({
     "Jakarta-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
@@ -23,8 +29,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      logClick("session_start", "AppLayout");
-      SplashScreen.hideAsync();
+      logClick("session_start", "AppLayout"); // Track app launch
+      SplashScreen.hideAsync(); // Hide splash once fonts are ready
     }
   }, [loaded]);
 

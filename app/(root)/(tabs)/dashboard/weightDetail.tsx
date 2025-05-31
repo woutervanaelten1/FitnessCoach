@@ -5,6 +5,7 @@ import DatePicker from "@/components/DatePicker";
 import IconTextBox from "@/components/IconTextBox";
 import InputModal from "@/components/inputModal";
 import LoadingErrorView from "@/components/LoadingErrorView";
+import WeightChart from "@/components/WeightChart";
 import config from "@/config";
 import { icons } from "@/constants";
 import { useEffect, useState } from "react";
@@ -13,7 +14,11 @@ import Toast from "react-native-toast-message";
 import { VictoryArea, VictoryAxis, VictoryChart, VictoryLabel, VictoryScatter, VictoryTheme } from "victory-native";
 
 /**
- * Represents a weight data entry.
+ * Represents a single entry in the weekly weight log.
+ *
+ * @property day - The day of the week (e.g., "Mon", "Tue").
+ * @property weight - The recorded body weight in kilograms for that day.
+ * @property isFixedDate - Whether this entry matches the currently selected date (used for highlighting).
  */
 type WeightEntry = {
     day: string;
@@ -161,6 +166,11 @@ const WeightDetail = () => {
         );
     }
 
+    /**
+     * Handles saving a new target weight to the server and updating local state.
+     *
+     * @param {number} inputTarget - The new target weight to be saved.
+     */
     const handleSaveNewGoal = async (inputTarget: number) => {
         try {
             // POST for new goal
@@ -198,6 +208,11 @@ const WeightDetail = () => {
     };
 
 
+    /**
+     * Logs a new current weight for the user and updates the weight history chart.
+     *
+     * @param {number} inputWeight - The current weight to log.
+     */
     const handleLogWeight = async (inputWeight: number) => {
         try {
             const heightInMeters = config.PROFILES[userId as keyof typeof config.PROFILES]?.height
@@ -292,55 +307,12 @@ const WeightDetail = () => {
             </View>
 
             {/* Weight Journey Chart */}
-            <View className="mt-6">
-                <Text className="text-black text-xl font-bold mb-1">Weight journey (in kgs)</Text>
-                {weightData.length > 0 ? (
-                    <>
-                        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)} kg</Text></Text>
-                        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-                            <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
-                                <VictoryAxis
-                                    tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
-                                    style={customThemeLineChart.axisBottom.style}
-                                />
-                                <VictoryAxis
-                                    dependentAxis
-                                    tickFormat={(t) => `${t}`} // Add "kg" to weight values
-                                    style={customThemeLineChart.axisLeft.style}
-                                />
-                                <VictoryArea
-                                    data={weightData}
-                                    x="day"
-                                    y="weight"
-                                    interpolation="monotoneX"
-                                    style={customThemeLineChart.area.style}
-                                />
-                                {weightData.length > 0 && (
-                                    <VictoryScatter
-                                        data={weightData}
-                                        x="day"
-                                        y="weight"
-                                        size={3}
-                                        style={{ data: { fill: "#4A90E2" } }}
-                                        labels={({ datum }) => `${datum.weight} kg`}
-                                        labelComponent={
-                                            <VictoryLabel
-                                                dy={-12}
-                                                style={{ fontSize: 11, fill: "#307FE2" }}
-                                            />
-                                        }
-                                    />
-                                )}
-                            </VictoryChart>
-                        </View>
-                    </>
-                ) : (
-                    <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-                        <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
-                    </View>
-
-                )}
-            </View>
+            <WeightChart
+                weightData={weightData}
+                currentWeight={currentWeight}
+                minWeight={minWeight}
+                maxWeight={maxWeight}
+            />
 
             {/* Modals */}
             <InputModal

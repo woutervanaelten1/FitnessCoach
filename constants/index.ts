@@ -39,6 +39,15 @@ import heart from "@/assets/icons/heart.png";
 import question from "@/assets/icons/question.png";
 import bulb from "@/assets/icons/lightbulb-solid.png";
 
+/**
+ * Asset Registry
+ * This module centralizes and exports static image and icon assets used throughout the app.
+ *
+ * @constant images - Image assets used for illustrations or general UI visuals.
+ * @constant icons - Icon assets used for buttons, navigation, and data representation.
+ */
+
+
 export const images = {
     check,
     noResult,

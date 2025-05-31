@@ -2,6 +2,12 @@ import { Link, Stack } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 
+/**
+ * Fallback screen for undefined routes.
+ * Displays an error message and a link to return to the home screen.
+ *
+ * @returns {JSX.Element} NotFound screen component.
+ */
 
 export default function NotFoundScreen() {
   return (

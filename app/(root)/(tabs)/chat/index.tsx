@@ -10,8 +10,10 @@ import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
 
 /**
-* Represents a suggested chat question.
-*/
+ * Represents a suggested chat question returned from the backend.
+ * @property question - The text of the suggested question.
+ */
+
 interface Question {
   question: string;
 }
@@ -51,6 +53,7 @@ const Index = () => {
 
   };
 
+  // Fetch suggested questions on component mount
   useEffect(() => {
     fetchData();
   }, []);
@@ -96,7 +99,7 @@ const Index = () => {
         </View>
       )}
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons to view earlier chats or start a new one */}
       <View className="py-4 bg-white">
         <CustomButton
           title="Browse earlier chats..."

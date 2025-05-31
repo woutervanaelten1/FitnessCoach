@@ -121,6 +121,7 @@ The most important parts of the project are highlighted in the following structu
 /fitnesscoach
  ├── /app - Main application logic
  │   ├── /auth - Authentication flow
+ │      ⚠️ This folder is currently **not used in the current version** of the app. (Placeholder for future)
  │   ├── /tabs - Contains main screens - (these folders contain different files)
  │   │   ├── /chat - Handles chat-related functionality: chat page and browsing earlier conversations
  │   │   ├── /dashboard - Displays fitness data and statistics, ranging from an overall dashboard to detailed ones
@@ -242,4 +243,4 @@ export default ChatBubble;
 ---
 
 ## 📬 Contact
-For any questions, feel free to reach out via **GitHub Issues** or **email@example.com**.
+For any questions, feel free to reach out via **wouter.vanaelten@gmail.com**.

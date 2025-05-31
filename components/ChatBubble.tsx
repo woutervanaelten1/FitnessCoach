@@ -2,6 +2,14 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Markdown from "react-native-markdown-display";
 import React, { memo } from "react";
 
+/**
+ * Props for the ChatBubble component.
+ * 
+ * @property message - Message content to display, supports Markdown.
+ * @property isUser - Whether the message was sent by the user.
+ * @property maxWidth - Max width of the bubble in percentage (e.g., 80 means 80%).
+ * @property onPress - Optional handler when the bubble is pressed.
+ */
 type ChatBubbleProps = {
   message: string;
   isUser: boolean;
@@ -9,6 +17,13 @@ type ChatBubbleProps = {
   onPress?: () => void;
 };
 
+/**
+ * ChatBubble renders a chat message bubble, supporting both user and bot messages.
+ * It supports optional markdown formatting and click behavior.
+ *
+ * @param {ChatBubbleProps} props - The props for the chat bubble.
+ * @returns {JSX.Element} The rendered chat bubble.
+ */
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, maxWidth, onPress }) => {
   const BubbleComponent = onPress ? TouchableOpacity : View;
 

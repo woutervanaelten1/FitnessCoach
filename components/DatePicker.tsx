@@ -4,11 +4,21 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { icons } from "@/constants";
 import { logClick } from "@/utils/clickLogger";
 
+/**
+ * Props for the DatePicker component.
+ * @property selectedDate - The currently selected date.
+ * @property setSelectedDate - Function to update the selected date.
+ */
 interface DatePickerProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
 }
 
+/**
+ * DatePicker Component
+ * Allows users to view and select a specific date.
+ * Includes previous/next buttons and an inline date picker modal.
+ */
 const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, setSelectedDate }) => {
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 

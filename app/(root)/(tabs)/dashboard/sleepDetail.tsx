@@ -12,7 +12,10 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
 /**
- * Represents the structure of weekly sleep data.
+ * Represents a single entry in the user's weekly sleep tracking data.
+ * @property day - The weekday label (e.g., 'Mon', 'Tue').
+ * @property hours - Total hours slept on that day (rounded to 2 decimal places).
+ * @property date - (Optional) ISO-formatted date string (YYYY-MM-DD) used for comparison/highlighting.
  */
 type SleepEntry = {
   day: string;
@@ -96,13 +99,17 @@ const SleepDetail = () => {
    * @param {string} type - The type to validate.
    * @returns {boolean} `true` if the type is "question", "advice", or "insight"; otherwise, `false`.
    */
-    const isValidDetailType = (type: string): type is "question" | "advice" | "insight" => {
-      return ["question", "advice", "insight"].includes(type);
-    };
+  const isValidDetailType = (type: string): type is "question" | "advice" | "insight" => {
+    return ["question", "advice", "insight"].includes(type);
+  };
 
   /**
-  * Formats selectedDate to match API and dataset format (YYYY-MM-DD).
-  */
+   * Converts a JavaScript Date to a YYYY-MM-DD string.
+   * Used to align with API query parameters and dataset keys.
+   *
+   * @param date - The date to format.
+   * @returns A string in the format 'YYYY-MM-DD'.
+   */
   const getFormattedDate = (date: Date) => date.toISOString().split("T")[0];
 
   /**
@@ -170,8 +177,8 @@ const SleepDetail = () => {
   };
 
   /**
-   * Fetches detailed sleep insights from the API.
-   * This can be a question, insight or adivce for the user
+   * Fetches a personalized AI-generated insight (question, advice, or observation)
+   * related to the user's sleep behavior on the previous day.
    */
   const fetchDetail = async () => {
     try {
@@ -285,7 +292,7 @@ const SleepDetail = () => {
           <VictoryBar barWidth={20} cornerRadius={{ top: 3 }} data={sleepData} x="day" y="hours"
             style={{
               data: {
-                fill: ({ datum }) => (getFormattedDate(new Date(selectedDate.getTime()-86400000)) === datum.date ? "#ff4d4d" : "#4A90E2"),
+                fill: ({ datum }) => (getFormattedDate(new Date(selectedDate.getTime() - 86400000)) === datum.date ? "#ff4d4d" : "#4A90E2"),
               },
             }}
             labels={({ datum }) => datum.hours}

@@ -14,7 +14,11 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme } from "victory-native";
 
 /**
- * Represents a weekly step data entry.
+ * Represents a single entry in the weekly step data.
+ *
+ * @property day - The day of the week (e.g., "Mon", "Tue").
+ * @property steps - Total number of steps taken on that day.
+ * @property isFixedDate - Indicates whether the entry matches the selected (highlighted) date.
  */
 type StepEntry = {
     day: string;

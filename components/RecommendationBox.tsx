@@ -6,6 +6,12 @@ import { Image, Text, View } from "react-native";
 /**
  * Recommendation Interface
  * Defines the structure of a recommendation item.
+ *
+ * @property {string} recommendation - The main recommendation text shown to the user.
+ * @property {string} reason - The justification or explanation behind the recommendation.
+ * @property {string} benefit - The expected benefit if the user follows the recommendation.
+ * @property {string} based_on - The data, behavior, or pattern the recommendation is derived from.
+ * @property {string} metric - The associated metric category (e.g., "steps", "calories").
  */
 interface Recommendation {
     recommendation: string;

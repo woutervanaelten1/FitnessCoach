@@ -11,9 +11,13 @@ import LoadingErrorView from "@/components/LoadingErrorView";
 import { useProfile } from "@/app/context/ProfileContext";
 import DatePicker from "@/components/DatePicker";
 import { logClick } from "@/utils/clickLogger";
+import WeightChart from "@/components/WeightChart";
 
 /**
- * Represents a weekly sleep data entry.
+ * Represents a single night's sleep summary.
+ * @property day - Weekday label (e.g., 'Mon').
+ * @property hours - Sleep duration in hours.
+ * @property date - Full date string (YYYY-MM-DD).
  */
 type SleepEntry = {
   day: string;
@@ -22,7 +26,9 @@ type SleepEntry = {
 };
 
 /**
- * Represents a heart rate entry.
+ * Represents a heart rate data point sampled at a specific minute of the day.
+ * @property time - Minute of the day (e.g., 0–1439 for 00:00 to 23:59).
+ * @property rate - Heart rate value in beats per minute (BPM).
  */
 type HeartRateEntry = {
   time: number;
@@ -30,7 +36,9 @@ type HeartRateEntry = {
 };
 
 /**
- * Represents a weight entry.
+ * Represents a weight measurement for a specific day.
+ * @property day - Weekday label (e.g., 'Mon', 'Tue').
+ * @property weight - Weight value in kilograms (kg).
  */
 type WeightEntry = {
   day: string;
@@ -368,55 +376,29 @@ const Dashboard = () => {
       </View>
 
       {/* Weight Section */}
-      <View>
+      <View className="relative">
         <Text className="text-black text-lg font-semibold mb-1">Weight journey (in kgs)</Text>
-        <Text className="text-blue-500 font-bold  mb-4">Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)}kg</Text></Text>
+        <Text className="text-blue-500 font-bold mb-4">
+          Current weight: <Text className="text-xl">{currentWeight?.toFixed(1)} kg</Text>
+        </Text>
         <Text className="text-blue-500 font-semibold text-sm mb-4">Touch the graph for more weight information</Text>
-        <TouchableOpacity className="relative z-10" onPress={() => { router.push("/dashboard/weightDetail"); }}>
-          {weightData.length > 0 ? (
-            <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-              <VictoryChart padding={{ top: 30, bottom: 40, left: 60, right: 35 }} height={224} theme={customThemeLineChart} domain={{ y: [minWeight ?? 0, maxWeight ?? 100] }}>
-                <VictoryAxis
-                  tickFormat={(t) => t} // Show days (e.g., "Mon", "Tue")
-                  style={customThemeLineChart.axisBottom.style}
-                />
-                <VictoryAxis
-                  dependentAxis
-                  tickFormat={(t) => `${t}`}
-                  style={customThemeLineChart.axisLeft.style}
-                />
-                <VictoryArea
-                  data={weightData}
-                  x="day"
-                  y="weight"
-                  interpolation="monotoneX"
-                  style={customThemeLineChart.area.style}
-                />
-                {weightData.length > 0 && (
-                  <VictoryScatter
-                    data={[weightData[weightData.length - 1]]} // Last data point (today)
-                    x="day"
-                    y="weight"
-                    size={3}
-                    style={{ data: { fill: "#307FE2" } }}
-                    labels={({ datum }) => `${datum.weight} kg`}
-                    labelComponent={
-                      <VictoryLabel
-                        dy={-12}
-                        style={{ fontSize: 12, fill: "#307FE2" }}
-                      />
-                    }
-                  />
-                )}
-              </VictoryChart>
-            </View>
-          ) : (
-            <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
-              <Text className="text-blue-500 font-bold text-lg text-center mt-4">No weight data available for the past week.</Text>
-            </View>
 
-          )}
-        </TouchableOpacity>
+        {/* Chart section */}
+        <View className="h-56 bg-gray-200 rounded-lg mb-6 items-center justify-center">
+          <WeightChart
+            weightData={weightData}
+            currentWeight={currentWeight ?? 0}
+            minWeight={minWeight}
+            maxWeight={maxWeight}
+            showTitle={false}
+          />
+          {/* Transparent overlay button */}
+          <TouchableOpacity
+            onPress={() => router.push("/dashboard/weightDetail")}
+            className="absolute top-0 left-0 right-0 bottom-0 z-20"
+            activeOpacity={1}
+          />
+        </View>
       </View>
 
     </ScrollView>

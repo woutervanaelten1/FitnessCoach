@@ -1,4 +1,13 @@
 import { Stack } from 'expo-router';
+/**
+ * Defines the stack navigation for the chat section.
+ * Includes routes for:
+ * - Chat overview (index)
+ * - Earlier chats
+ * - New chat screen
+ * - Conversation detail view (with dynamic conversationId)
+ */
+
 
 export default function ChatLayout() {
   return (
