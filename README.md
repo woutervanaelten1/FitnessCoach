@@ -1,122 +1,70 @@
-# Welcome to your Expo app 👋
+# Fitness Chatbot App — Thesis Project 💪🧠
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This repository contains the full-stack codebase for my Master's thesis in Applied Informatics – AI Track (KU Leuven).  
+It consists of:
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-
-
-# Fitness Chatbot App
-
-A **React Native Expo** application that features a chatbot capable of interacting with users based on their **fitness data**. The chatbot supports **Markdown rendering**, a custom `ChatBubble` component, and various UI optimizations.
-
-## 📌 Features
-- **Chatbot for Fitness Insights**: Users can ask questions about their fitness data.
-- **Custom Chat UI**: Designed with a `ChatBubble` component for structured conversations.
-- **Markdown Support**: Uses `react-native-markdown-display` to format messages.
-- **Optimized Performance**: Utilizes `memo`, `useCallback`, and `StyleSheet.create`.
-- **Built with React Native & Expo**: Easily deployable across platforms.
-- **Graphical Visualizations**: Uses `victory-native` for rendering charts.
-- **User Feedback Alerts**: Implements `react-native-toast-message` for notifications.
+- **Frontend:** A [React Native](https://reactnative.dev/) app built with [Expo](https://expo.dev), providing users with an engaging, conversational interface for tracking and understanding their fitness data.
+- **Backend:** A [FastAPI](https://fastapi.tiangolo.com/) server (Python), which powers the chatbot, provides personalized insights, and serves fitness data from a database and CSV files.
 
 ---
 
-## 📦 Dependencies
-This project requires the following **non-standard** packages:
+## 🗂️ Project Structure
+Applicatie_react_native_expo/
+├── Frontend/
+│ └── FitnessCoach/ # React Native + Expo app
+├── Backend/ # FastAPI backend (Python)
+│ ├── main.py
+│ ├── data_endpoints.py
+│ ├── chatbot_endpoints_sql.py
+│ ├── database.py
+│ ├── init.py
+│ ├── .env # (not committed)
+│ ├── data/ # fitness tracker CSVs
+│ ├── click_logs/ # user interaction logs
+│ └── ...
+├── .gitignore
+├── README.md
 
-| Package                           | Description |
-|-----------------------------------|------------|
-| `react-native-markdown-display`   | Renders markdown in chat bubbles. |
-| `expo`                            | Framework for React Native apps. |
-| `react-native-gesture-handler`    | Handles gestures in Expo. |
-| `react-native-reanimated`         | Enables smooth animations. |
-| `react-native-svg`                | Provides SVG support for graphical elements. |
-| `victory-native`                  | Enables data visualization and charts. |
-| `react-native-toast-message`      | Displays toast notifications in the app. |
+---
 
-To install all dependencies, run:
+## 🚀 How to Run the Project
+
+### ▶️ 1. Frontend (Expo React Native App)
+
 ```sh
+cd Frontend/FitnessCoach
 npm install
+npx expo start
 ```
-Or, if using **Yarn**:
+
+Use Expo Go on your mobile device, or an Android/iOS emulator, to view the app.
+Edit code in the app directory—this project uses file-based routing.
+
+### ▶️ 2. Backend (FastAPI Python Server)
+
 ```sh
-yarn install
+cd Backend
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+Requires Python 3.10+.
+The API will be available at http://127.0.0.1:8000.
+The .env file (not committed to git) should contain any sensitive settings.
 
 ---
 
-## 🛠 Setup & Installation
+### Backend Overview
+- main.py: Entry point; starts the FastAPI application.
+- data_endpoints.py: API endpoints to serve fitness data.
+- chatbot_endpoints_sql.py: Endpoints for chatbot logic and LLM integration.
+- database.py: Handles connection to the SQLite database.
+- data/: Directory containing used fitness tracker CSVs and associated .db file.
+- click_logs/: Logs user interactions for analysis.
+- .env: Environment variables (OPEN_API_KEY).
 
-### 1️⃣ Install Expo CLI (if not installed)
-```sh
-npm install -g expo-cli
-```
-
-### 2️⃣ Clone this repository
-```sh
-git clone https://github.com/yourusername/fitness-chatbot.git
-cd fitness-chatbot
-```
-
-### 3️⃣ Install dependencies
-```sh
-npm install
-```
-
-### 4️⃣ Start the development server
-```sh
-expo start
-```
-Scan the QR code with **Expo Go** (iOS/Android) or use an emulator.
-
----
-
-## 🏗️ Project Structure
-The most important parts of the project are highlighted in the following structure:
+### Front-end Project Structure
+The most important parts of the front-end are highlighted in the following structure:
 ```
 /fitnesscoach
  ├── /app - Main application logic
@@ -138,107 +86,61 @@ The most important parts of the project are highlighted in the following structu
 
 ---
 
-## 🏗️ Layout Structure (`_layout.tsx` Files)
-This project follows a **modular layout system** using `_layout.tsx` files in different sections of the app. These files help define the structure and navigation of each section.
+### Key Dependencies
+This project requires the following **non-standard** packages (front-end):
 
-### **Key Roles of `_layout.tsx` Files**
-- **Navigation Handling**: Each `_layout.tsx` file wraps the respective section in a navigation container.
-- **Consistent UI Structure**: Ensures shared headers, footers, or common UI elements across screens.
-- **Efficient Routing**: Organizes screens into logical groups, improving maintainability.
+| Package                           | Description |
+|-----------------------------------|------------|
+| `react-native-markdown-display`   | Renders markdown in chat bubbles. |
+| `expo`                            | Framework for React Native apps. |
+| `react-native-gesture-handler`    | Handles gestures in Expo. |
+| `react-native-reanimated`         | Enables smooth animations. |
+| `react-native-svg`                | Provides SVG support for graphical elements. |
+| `victory-native`                  | Enables data visualization and charts. |
+| `react-native-toast-message`      | Displays toast notifications in the app. |
+| `nativewind`                      | Tailwind CSS styling for React Native. |
 
----
-
-## 🗨️ `ChatBubble` Component
-This project includes a **custom chat UI** that supports markdown-formatted messages.
-
-### 📌 **Features**
-✔️ Supports user and bot messages.  
-✔️ Uses `react-native-markdown-display` for text formatting.  
-✔️ Optimized with `memo` and `useCallback` for performance.
-
-### 📝 **Code Example**
-```tsx
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import Markdown from "react-native-markdown-display";
-
-type ChatBubbleProps = {
-  message: string;
-  isUser: boolean;
-  maxWidth: number;
-  onPress?: () => void;
-};
-
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, isUser, maxWidth, onPress }) => {
-  const ContainerComponent = onPress ? TouchableOpacity : View;
-
-  return (
-    <ContainerComponent
-      onPress={onPress}
-      style={[
-        styles.bubble,
-        isUser ? styles.userBubble : styles.botBubble,
-        { maxWidth: `${maxWidth}%` },
-      ]}
-    >
-      <View>
-        <Markdown
-          style={{
-            body: {
-              fontSize: 16,
-              marginVertical: 4,
-              color: isUser ? "#FFFFFF" : "#000000",
-            },
-            bullet_list: {
-              marginLeft: 20,
-              color: isUser ? "#FFFFFF" : "#000000",
-            },
-          }}
-        >
-          {message}
-        </Markdown>
-      </View>
-    </ContainerComponent>
-  );
-};
-
-const styles = StyleSheet.create({
-  bubble: {
-    flexShrink: 1,
-    padding: 10,
-    borderRadius: 10,
-    marginVertical: 5,
-    minHeight: 40,
-  },
-  userBubble: {
-    backgroundColor: "#307FE2",
-    alignSelf: "flex-end",
-  },
-  botBubble: {
-    backgroundColor: "#E5E7EB",
-    alignSelf: "flex-start",
-  },
-});
-
-export default ChatBubble;
+To install all dependencies, run:
+```sh
+npm install
+```
+Or, if using **Yarn**:
+```sh
+yarn install
 ```
 
+### Backend (FastAPI)
+- fastapi, uvicorn
+- pydantic
+- sqlite3 (standard library)
+- pandas (for CSV/data handling)
+- python-dotenv (for .env config)
+
+Install dependencies with:
+```sh
+pip install -r requirements.txt
+```
 ---
 
-## 🎨 **Styling**
-- **Markdown Colors:**
-  - White text for user messages.
-  - Black text for bot messages.
-- **Uses Tailwind CSS for React Native (if applicable).**
+### 🛠️ Usage & Development Tips
+- Change API base URL: If you change backend port or deploy to another server, update config.js in Frontend/FitnessCoach/.
+- Testing backend endpoints: Use a tool like http://localhost:8000/docs (Swagger UI auto-generated by FastAPI).
+- User data: Uses pre-existing fitness tracker data (CSV/database); no live device integration.
+- Click logs: User interactions with the app are logged in Backend/click_logs/ for research/analysis.
 
 ---
 
-## 💡 Troubleshooting
-- **App crashes on startup?**  
-  Run `expo start --clear` to reset the cache.
-- **Markdown not rendering properly?**  
-  Ensure `react-native-markdown-display` is installed.
-- **Style issues?**  
-  Try updating dependencies: `npm update` or `expo doctor`.
+### Features
+- Conversational Chatbot: Users can ask questions about their fitness data (steps, sleep, heart rate, goals, etc.) and get actionable insights.
+- Personalized Recommendations: Backend processes user data to provide advice and visualizations.
+- Rich UI: Custom ChatBubble component, markdown rendering, charts with victory-native.
+- User Feedback: Toast notifications for actions and responses.
+
+---
+
+### Layout and UI Details
+- Modular Layouts: _layout.tsx files organize navigation and shared UI per section.
+- Reusable Components: Designed for maintainability and scalability.
 
 ---
 
