@@ -8,6 +8,7 @@ It consists of:
 
 ---
 
+```
 ## 🗂️ Project Structure
 Applicatie_react_native_expo/
 ├── Frontend/
@@ -24,6 +25,7 @@ Applicatie_react_native_expo/
 │ └── ...
 ├── .gitignore
 ├── README.md
+```
 
 ---
 
