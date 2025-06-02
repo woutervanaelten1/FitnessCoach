@@ -1,6 +1,6 @@
 const config = {
-    // API_BASE_URL: "http://192.168.0.245:8000",
-    API_BASE_URL: "https://skink-coherent-silkworm.ngrok-free.app",
+    // Backend url
+    API_BASE_URL: "http://192.168.0.245:8000",
     FIXED_DATE: "2016-04-14",
     USER_ID: "6962181067",
     ACTIVE_PROFILE: "user1",
