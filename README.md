@@ -132,6 +132,20 @@ pip install -r requirements.txt
 
 ---
 
+### Disclaimer
+
+This application was developed using a publicly available dataset from 2016: [FitBit Fitness Tracker Data on Kaggle](https://www.kaggle.com/datasets/arashnic/fitbit).  
+The dataset has been cleaned and is included under `/Backend/data/` for demonstration and research purposes.
+
+Due to the historical nature of the dataset, a **fixed date (`14-04-2016`)** has been hardcoded into both the application and the chatbot to align with the data's timeframe. This ensures meaningful interactions and valid responses from the LLM.
+
+> **Note for future implementations:**  
+> If you want to connect this app to **real-time user data**, you must:
+> - **Remove the hardcoded date** from both the chatbot prompt and the app configuration (config.js).
+> - **Use the current system date** instead so that the chatbot and app respond based on the user's actual, up-to-date fitness data.
+
+---
+
 ### Features
 - Conversational Chatbot: Users can ask questions about their fitness data (steps, sleep, heart rate, goals, etc.) and get actionable insights.
 - Personalized Recommendations: Backend processes user data to provide advice and visualizations.
