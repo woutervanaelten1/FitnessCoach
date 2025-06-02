@@ -804,7 +804,7 @@ async def get_new_goal(
 
 
 @router.get("/suggested_questions")
-async def get_suggested_questions(user_id: str = Query(..., description="User ID to filter the data")):
+async def get_suggested_questions(date: str = Query(..., description="Date in YYYY-MM-DD format"), user_id: str = Query(..., description="User ID to filter the data")):
     """
     Return 3 diverse questions the user could ask the chatbot based on their profile and possible interests.
     
@@ -816,7 +816,7 @@ async def get_suggested_questions(user_id: str = Query(..., description="User ID
         return {"error": "User not found"}
 
     question = f"""
-    The user details are:
+    Today is {date}. The user details are:
     - Name: {user_profile.get('name')}
     - Age: {user_profile.get('age')} years old
     - Height: {user_profile.get('height')} meters

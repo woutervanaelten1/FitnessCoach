@@ -39,7 +39,7 @@ const Index = () => {
     try {
       setIsLoading(true);
       setHasError(false);
-      const response = await fetch(`${config.API_BASE_URL}/chat/suggested_questions?user_id=${userId}`);
+      const response = await fetch(`${config.API_BASE_URL}/chat/suggested_questions?date=${config.FIXED_DATE}&user_id=${userId}`);
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();

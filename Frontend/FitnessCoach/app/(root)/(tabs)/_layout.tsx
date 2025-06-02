@@ -131,16 +131,6 @@ const Layout = () => {
               tabBarIcon: () => <TabIcon focused={isTabActive("/profile")} source={icons.profile} />,
             }}
           />
-
-          {/* Hidden Route Example */}
-          <Tabs.Screen
-            name="_layout_NEW"
-            options={{
-              title: "Edit Targets",
-              headerShown: false,
-              href: null, // Prevents this route from appearing in the tab bar
-            }}
-          />
         </Tabs>
       </View>
     </SafeAreaView>
